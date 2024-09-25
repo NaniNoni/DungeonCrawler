@@ -2,6 +2,7 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -47,6 +48,39 @@ public class Main extends ApplicationAdapter {
 
     private void input() {
         Vector2 direction = new Vector2();
+
+        // Check for WASD key presses and update direction accordingly
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            direction.y += 1;  // Move up
+            player.setAnimationState(Player.PlayerAnimation.Walk);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            direction.y -= 1;  // Move down
+            player.setAnimationState(Player.PlayerAnimation.Walk);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            direction.x -= 1;  // Move left
+            player.setAnimationState(Player.PlayerAnimation.Walk);
+
+            if (player.getDirection() == Direction.Right) {
+                player.flipSprite();
+            }
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            direction.x += 1;  // Move right
+            player.setAnimationState(Player.PlayerAnimation.Walk);
+
+            if (player.getDirection() == Direction.Left) {
+                player.flipSprite();
+            }
+        } else {
+            player.setAnimationState(Player.PlayerAnimation.Idle);
+        }
+
+        direction.nor();
+
+        Vector2 translation = direction.scl(player.getSpeed() * Gdx.graphics.getDeltaTime());
+        player.position.add(translation);
     }
 
     private void logic() {
@@ -54,19 +88,21 @@ public class Main extends ApplicationAdapter {
 
     private void draw() {
         ScreenUtils.clear(Color.BLACK);
+        stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
         // Update camera
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
 
-        stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
-
         // Get current frame of animation for the current stateTime
         TextureRegion currentFrame = player.getCurrentFrame(stateTime);
         spriteBatch.begin();
-        spriteBatch.draw(currentFrame, 50, 50,
-            currentFrame.getRegionWidth() * 2,
-            currentFrame.getRegionHeight() * 2
+        float width = currentFrame.getRegionWidth();
+        float height = currentFrame.getRegionHeight();
+        spriteBatch.draw(
+            currentFrame,
+            player.position.x, player.position.y,
+            width * 2, height * 2
         );
         spriteBatch.end();
     }
