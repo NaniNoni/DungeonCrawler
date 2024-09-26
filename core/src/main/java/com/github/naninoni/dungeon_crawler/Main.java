@@ -55,27 +55,47 @@ public class Main extends ApplicationAdapter {
         // Check for WASD key presses and update direction accordingly
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             direction.y += 1;  // Move up
-            player.setAnimationState(Player.PlayerAnimation.WalkFront);
+            player.setAnimationState(Player.PlayerAnimation.WalkBack);
+            player.isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             direction.y -= 1;  // Move down
-            player.setAnimationState(Player.PlayerAnimation.WalkBack);
+            player.setAnimationState(Player.PlayerAnimation.WalkFront);
+            player.isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             direction.x -= 1;  // Move left
             player.setAnimationState(Player.PlayerAnimation.WalkLeft);
+            player.isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             direction.x += 1;  // Move right
             player.setAnimationState(Player.PlayerAnimation.WalkRight);
-        } else {
-            player.setAnimationState(Player.PlayerAnimation.IdleFront);
-            // TODO: figure out last direction and update idle animation
+            player.isMoving = true;
+        }
+
+        // If the player isn't moving, switch to the idle animation for the last direction
+        if (!player.isMoving) {
+            switch (player.getAnimationState()) {
+                case WalkBack:
+                    player.setAnimationState(Player.PlayerAnimation.IdleBack);
+                    break;
+                case WalkFront:
+                    player.setAnimationState(Player.PlayerAnimation.IdleFront);
+                    break;
+                case WalkLeft:
+                    player.setAnimationState(Player.PlayerAnimation.IdleLeft);
+                    break;
+                case WalkRight:
+                    player.setAnimationState(Player.PlayerAnimation.IdleRight);
+                    break;
+            }
         }
 
         // Normalize translation vector so that the player doesn't move faster diagonally
         direction.nor();
 
+        // Move player based on direction and speed
         Vector2 translation = direction.scl(player.getSpeed() * Gdx.graphics.getDeltaTime());
         player.position.add(translation);
     }

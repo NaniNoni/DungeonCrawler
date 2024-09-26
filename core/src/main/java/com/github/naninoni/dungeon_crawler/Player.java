@@ -31,6 +31,7 @@ public class Player {
         WalkRight
     }
 
+    public boolean isMoving = false;
     public Vector2 position = new Vector2();
     private float speed = 400f;
     private PlayerAnimation animationState = PlayerAnimation.IdleFront;
@@ -50,21 +51,24 @@ public class Player {
         TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 6);
         TextureRegion[] idleSide = Arrays.copyOfRange(regions[1], 0, 6);
         TextureRegion[] idleFront = Arrays.copyOfRange(regions[2], 0, 6);
-        TextureRegion[] walkBack = Arrays.copyOfRange(regions[3], 0, 6);
+        TextureRegion[] walkFront = Arrays.copyOfRange(regions[3], 0, 6);
         TextureRegion[] walkSide = Arrays.copyOfRange(regions[4], 0, 6);
-        TextureRegion[] walkFront = Arrays.copyOfRange(regions[5], 0, 6);
+        TextureRegion[] walkBack = Arrays.copyOfRange(regions[5], 0, 6);
         TextureRegion[] attackFront = Arrays.copyOfRange(regions[6], 0, 4);
         TextureRegion[] attackSide = Arrays.copyOfRange(regions[7], 0, 4);
         TextureRegion[] attackBack = Arrays.copyOfRange(regions[8], 0, 4);
         TextureRegion[] die = Arrays.copyOfRange(regions[9], 0, 3);
 
         animations.put(PlayerAnimation.IdleFront, new Animation<>(FRAME_DURATION, idleFront));
+        animations.put(PlayerAnimation.IdleBack, new Animation<>(FRAME_DURATION, idleBack));
+        animations.put(PlayerAnimation.IdleLeft, new Animation<>(FRAME_DURATION, idleSide));
+        animations.put(PlayerAnimation.IdleRight, new Animation<>(FRAME_DURATION, idleFront));
 
         animations.put(PlayerAnimation.WalkFront, new Animation<>(FRAME_DURATION, walkFront));
         animations.put(PlayerAnimation.WalkBack, new Animation<>(FRAME_DURATION, walkBack));
         // TODO: update animation based on player's direction
-        animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkSide));
         animations.put(PlayerAnimation.WalkLeft, new Animation<>(FRAME_DURATION, walkSide));
+        animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkSide));
     }
 
     public TextureRegion getCurrentFrame(float stateTime) {
