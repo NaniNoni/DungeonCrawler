@@ -3,6 +3,7 @@ package com.github.naninoni.dungeon_crawler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -31,7 +32,7 @@ public class Player {
     }
 
     public Vector2 position = new Vector2();
-    private float speed = 200f;
+    private float speed = 400f;
     private PlayerAnimation animationState = PlayerAnimation.IdleFront;
     private final EnumMap<PlayerAnimation, Animation<TextureRegion>> animations = new EnumMap<>(PlayerAnimation.class);
     Texture playerSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
@@ -68,6 +69,19 @@ public class Player {
 
     public TextureRegion getCurrentFrame(float stateTime) {
         return animations.get(animationState).getKeyFrame(stateTime, true);
+    }
+
+    public void draw(SpriteBatch batch, float stateTime) {
+        TextureRegion currentFrame = getCurrentFrame(stateTime);
+
+        batch.draw(
+            currentFrame,
+            position.x, position.y,
+            position.x / 2, position.y / 2,
+            currentFrame.getRegionWidth(),
+            currentFrame.getRegionHeight(),
+            2.0f, 2.0f, 0.0f
+        );
     }
 
     public PlayerAnimation getAnimationState() {

@@ -17,6 +17,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class Main extends ApplicationAdapter {
     private Player player;
+    private Chest chest;
+
     private SpriteBatch spriteBatch;
     private float stateTime;
     private OrthographicCamera camera;
@@ -32,6 +34,7 @@ public class Main extends ApplicationAdapter {
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
 
         player = new Player();
+        chest = new Chest();
 
         // Instantiate a SpriteBatch for drawing and reset the elapsed animation
         // time to 0
@@ -89,15 +92,14 @@ public class Main extends ApplicationAdapter {
         spriteBatch.setProjectionMatrix(camera.combined);
 
         // Get current frame of animation for the current stateTime
-        TextureRegion currentFrame = player.getCurrentFrame(stateTime);
+        TextureRegion playerFrame = player.getCurrentFrame(stateTime);
+        TextureRegion chestFrame = chest.getCurrentFrame(stateTime);
+
         spriteBatch.begin();
-        float width = currentFrame.getRegionWidth();
-        float height = currentFrame.getRegionHeight();
-        spriteBatch.draw(
-            currentFrame,
-            player.position.x, player.position.y,
-            width * 2, height * 2
-        );
+
+        player.draw(spriteBatch, stateTime);
+        chest.draw(spriteBatch, stateTime);
+
         spriteBatch.end();
     }
 
@@ -109,6 +111,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         player.dispose();
+        chest.dispose();
         spriteBatch.dispose();
     }
 }
