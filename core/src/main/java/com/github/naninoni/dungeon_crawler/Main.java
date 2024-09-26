@@ -52,31 +52,25 @@ public class Main extends ApplicationAdapter {
         // Check for WASD key presses and update direction accordingly
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             direction.y += 1;  // Move up
-            player.setAnimationState(Player.PlayerAnimation.Walk);
+            player.setAnimationState(Player.PlayerAnimation.WalkFront);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             direction.y -= 1;  // Move down
-            player.setAnimationState(Player.PlayerAnimation.Walk);
+            player.setAnimationState(Player.PlayerAnimation.WalkBack);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             direction.x -= 1;  // Move left
-            player.setAnimationState(Player.PlayerAnimation.Walk);
-
-            if (player.getDirection() == Direction.Right) {
-                player.flipSprite();
-            }
+            player.setAnimationState(Player.PlayerAnimation.WalkLeft);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             direction.x += 1;  // Move right
-            player.setAnimationState(Player.PlayerAnimation.Walk);
-
-            if (player.getDirection() == Direction.Left) {
-                player.flipSprite();
-            }
+            player.setAnimationState(Player.PlayerAnimation.WalkRight);
         } else {
-            player.setAnimationState(Player.PlayerAnimation.Idle);
+            player.setAnimationState(Player.PlayerAnimation.IdleFront);
+            // TODO: figure out last direction and update idle animation
         }
 
+        // Normalize translation vector so that the player doesn't move faster diagonally
         direction.nor();
 
         Vector2 translation = direction.scl(player.getSpeed() * Gdx.graphics.getDeltaTime());
@@ -114,6 +108,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        player.dispose();
         spriteBatch.dispose();
     }
 }
