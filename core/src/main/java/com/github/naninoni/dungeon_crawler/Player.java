@@ -44,7 +44,7 @@ public class Player {
         TextureRegion[][] regions = TextureRegion.split(playerSheet,
             playerSheet.getWidth() / TEXTURES_PER_ROW,
             playerSheet.getHeight() / TEXTURES_PER_COLUMN
-        );
+        );  
 
         TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 6);
         TextureRegion[] idleSide = Arrays.copyOfRange(regions[1], 0, 6);
