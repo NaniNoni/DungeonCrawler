@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
 public class Main extends ApplicationAdapter {
+    private Slime slime;
     private Player player;
     private SpriteBatch spriteBatch;
     private float stateTime;
@@ -32,6 +33,7 @@ public class Main extends ApplicationAdapter {
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
 
         player = new Player();
+        slime = new Slime();
 
         // Instantiate a SpriteBatch for drawing and reset the elapsed animation
         // time to 0
@@ -89,16 +91,25 @@ public class Main extends ApplicationAdapter {
         spriteBatch.setProjectionMatrix(camera.combined);
 
         // Get current frame of animation for the current stateTime
-        TextureRegion currentFrame = player.getCurrentFrame(stateTime);
+        TextureRegion playerFrame = player.getCurrentFrame(stateTime);
+        TextureRegion slimeFrame = slime.getCurrentFrame(stateTime);
         spriteBatch.begin();
-        float width = currentFrame.getRegionWidth();
-        float height = currentFrame.getRegionHeight();
+        float playerWidth = playerFrame.getRegionWidth();
+        float playerHeight = playerFrame.getRegionHeight();
+        float slimeWidth = slimeFrame.getRegionWidth();
+        float slimeHeight = slimeFrame.getRegionHeight();
         spriteBatch.draw(
-            currentFrame,
+            playerFrame,
             player.position.x, player.position.y,
-            width * 2, height * 2
+            playerWidth * 2, playerHeight * 2
+        );
+        spriteBatch.draw(
+            slimeFrame,
+            slime.position.x, slime.position.y,
+            slimeWidth * 2, slimeHeight * 2
         );
         spriteBatch.end();
+
     }
 
     @Override
@@ -109,6 +120,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         player.dispose();
+        slime.dispose();
         spriteBatch.dispose();
     }
 }
