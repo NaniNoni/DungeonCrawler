@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.ArrayList;
+
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
@@ -111,14 +113,10 @@ public class Main extends ApplicationAdapter {
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
 
-        // Get current frame of animation for the current stateTime
-        TextureRegion playerFrame = player.getCurrentFrame(stateTime);
-        TextureRegion chestFrame = chest.getCurrentFrame(stateTime);
-
         spriteBatch.begin();
 
-        player.draw(spriteBatch, stateTime);
-        chest.draw(spriteBatch, stateTime);
+        player.draw(spriteBatch, stateTime, 2.0f);
+        chest.draw(spriteBatch, stateTime, 2.0f);
 
         spriteBatch.end();
     }
@@ -131,7 +129,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         player.dispose();
-        chest.dispose();
         spriteBatch.dispose();
     }
 }

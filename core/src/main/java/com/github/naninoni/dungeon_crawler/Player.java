@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.Arrays;
 import java.util.EnumMap;
 
-public class Player {
+public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     public float getSpeed() {
         return speed;
     }
@@ -32,20 +32,19 @@ public class Player {
     }
 
     public boolean isMoving = false;
-    public Vector2 position = new Vector2();
     private float speed = 400f;
-    private PlayerAnimation animationState = PlayerAnimation.IdleFront;
-    private final EnumMap<PlayerAnimation, Animation<TextureRegion>> animations = new EnumMap<>(PlayerAnimation.class);
-    Texture playerSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
+    private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
 
     public Player() {
+        super(new Vector2(), 50f, PlayerAnimation.IdleFront);
+
         final int TEXTURES_PER_ROW = 6;
         final int TEXTURES_PER_COLUMN = 10;
         final float FRAME_DURATION = 0.25f;
 
-        TextureRegion[][] regions = TextureRegion.split(playerSheet,
-            playerSheet.getWidth() / TEXTURES_PER_ROW,
-            playerSheet.getHeight() / TEXTURES_PER_COLUMN
+        TextureRegion[][] regions = TextureRegion.split(spriteSheet,
+            spriteSheet.getWidth() / TEXTURES_PER_ROW,
+            spriteSheet.getHeight() / TEXTURES_PER_COLUMN
         );
 
         TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 6);
@@ -71,23 +70,6 @@ public class Player {
         animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkSide));
     }
 
-    public TextureRegion getCurrentFrame(float stateTime) {
-        return animations.get(animationState).getKeyFrame(stateTime, true);
-    }
-
-    public void draw(SpriteBatch batch, float stateTime) {
-        TextureRegion currentFrame = getCurrentFrame(stateTime);
-
-        batch.draw(
-            currentFrame,
-            position.x, position.y,
-            position.x / 2, position.y / 2,
-            currentFrame.getRegionWidth(),
-            currentFrame.getRegionHeight(),
-            2.0f, 2.0f, 0.0f
-        );
-    }
-
     public PlayerAnimation getAnimationState() {
         return animationState;
     }
@@ -96,6 +78,6 @@ public class Player {
     }
 
     public void dispose() {
-        playerSheet.dispose();
+        spriteSheet.dispose();
     }
 }
