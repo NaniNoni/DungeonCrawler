@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.Arrays;
 import java.util.EnumMap;
 
-public class Slime {
+public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     public float getSpeed() {
         return speed;
     }
@@ -30,21 +30,21 @@ public class Slime {
         MoveRight
     }
 
-    public Vector2 position = new Vector2();
     private float speed = 200f;
-    private SlimeAnimation animationState = SlimeAnimation.IdleFront;
-    private final EnumMap<SlimeAnimation, Animation<TextureRegion>> animations = new EnumMap<>(SlimeAnimation.class);
-    Texture playerSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
+    Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
+        super(new Vector2(50, 50), 50f, SlimeAnimation.IdleFront);
+
         final int TEXTURES_PER_ROW = 7;
         final int TEXTURES_PER_COLUMN = 13;
         final float FRAME_DURATION = 0.25f;
 
-        TextureRegion[][] regions = TextureRegion.split(playerSheet,
-            playerSheet.getWidth() / TEXTURES_PER_ROW,
-            playerSheet.getHeight() / TEXTURES_PER_COLUMN
+        TextureRegion[][] regions = TextureRegion.split(spriteSheet,
+            spriteSheet.getWidth() / TEXTURES_PER_ROW,
+            spriteSheet.getHeight() / TEXTURES_PER_COLUMN
         );
+
         //NOTE: any back animation is looking towards the player
         TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 4);
         TextureRegion[] idleSide = Arrays.copyOfRange(regions[1], 0, 4);
@@ -67,18 +67,7 @@ public class Slime {
         animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkSide));
     }
 
-    public TextureRegion getCurrentFrame(float stateTime) {
-        return animations.get(animationState).getKeyFrame(stateTime, true);
-    }
-
-    public SlimeAnimation getAnimationState() {
-        return animationState;
-    }
-    public void setAnimationState(SlimeAnimation animationState) {
-        this.animationState = animationState;
-    }
-
     public void dispose() {
-        playerSheet.dispose();
+        spriteSheet.dispose();
     }
 }
