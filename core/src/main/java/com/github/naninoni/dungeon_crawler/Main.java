@@ -119,6 +119,7 @@ public class Main extends ApplicationAdapter {
 
         player.draw(spriteBatch, stateTime, 2.0f);
         chest.draw(spriteBatch, stateTime, 2.0f);
+        slime.draw(spriteBatch, stateTime, 2.0f);
 
         spriteBatch.end();
 
