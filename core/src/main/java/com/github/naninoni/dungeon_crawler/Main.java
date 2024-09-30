@@ -18,6 +18,7 @@ import java.util.ArrayList;
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
 public class Main extends ApplicationAdapter {
+    private Slime slime;
     private Player player;
     private Chest chest;
 
@@ -37,6 +38,7 @@ public class Main extends ApplicationAdapter {
 
         player = new Player();
         chest = new Chest();
+        slime = new Slime();
 
         // Instantiate a SpriteBatch for drawing and reset the elapsed animation
         // time to 0
@@ -119,6 +121,7 @@ public class Main extends ApplicationAdapter {
         chest.draw(spriteBatch, stateTime, 2.0f);
 
         spriteBatch.end();
+
     }
 
     @Override
@@ -129,6 +132,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void dispose() {
         player.dispose();
+        slime.dispose();
         spriteBatch.dispose();
     }
 }
