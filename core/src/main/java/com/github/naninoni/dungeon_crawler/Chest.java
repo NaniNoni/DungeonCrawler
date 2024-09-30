@@ -32,6 +32,8 @@ public class Chest extends AnimatedGameObject<Chest.ChestAnimation> {
         }
 
         openAnimation = new Animation<>(FRAME_DURATION, sprites);
+
+        animations.put(ChestAnimation.Open, openAnimation);
     }
 
     public void open() {

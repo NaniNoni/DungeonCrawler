@@ -58,26 +58,26 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             direction.y += 1;  // Move up
             player.setAnimationState(Player.PlayerAnimation.WalkBack);
-            player.isMoving = true;
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             direction.y -= 1;  // Move down
             player.setAnimationState(Player.PlayerAnimation.WalkFront);
-            player.isMoving = true;
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             direction.x -= 1;  // Move left
             player.setAnimationState(Player.PlayerAnimation.WalkLeft);
-            player.isMoving = true;
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             direction.x += 1;  // Move right
             player.setAnimationState(Player.PlayerAnimation.WalkRight);
-            player.isMoving = true;
+            player.setMoving(true);
         }
 
         // If the player isn't moving, switch to the idle animation for the last direction
-        if (!player.isMoving) {
+        if (!player.isMoving()) {
             switch (player.getAnimationState()) {
                 case WalkBack:
                     player.setAnimationState(Player.PlayerAnimation.IdleBack);

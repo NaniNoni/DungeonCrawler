@@ -3,22 +3,12 @@ package com.github.naninoni.dungeon_crawler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
-    public float getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
     public enum PlayerAnimation {
         IdleFront,
         IdleBack,
@@ -31,7 +21,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         WalkRight
     }
 
-    public boolean isMoving = false;
+    private boolean isMoving = false;
     private float speed = 400f;
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
 
@@ -77,6 +67,21 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         this.animationState = animationState;
     }
 
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setMoving(boolean moving) {
+        isMoving = moving;
+    }
     public void dispose() {
         spriteSheet.dispose();
     }
