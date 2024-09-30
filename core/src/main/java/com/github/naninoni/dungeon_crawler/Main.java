@@ -4,15 +4,11 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-
-import java.util.ArrayList;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
@@ -47,9 +43,10 @@ public class Main extends ApplicationAdapter {
     }
 
     @Override
+    // This isn't really the render function. It's the game loop,
+    // But the LibGDX loop function is called render. The "real" render function is draw.
     public void render() {
         input();
-        logic();
         draw();
     }
 
@@ -78,6 +75,11 @@ public class Main extends ApplicationAdapter {
             player.setMoving(true);
         }
 
+        // Not moving
+        if (direction == Vector2.Zero) {
+            player.setMoving(false);
+        }
+
         // If the player isn't moving, switch to the idle animation for the last direction
         if (!player.isMoving()) {
             switch (player.getAnimationState()) {
@@ -102,9 +104,6 @@ public class Main extends ApplicationAdapter {
         // Move player based on direction and speed
         Vector2 translation = direction.scl(player.getSpeed() * Gdx.graphics.getDeltaTime());
         player.position.add(translation);
-    }
-
-    private void logic() {
     }
 
     private void draw() {

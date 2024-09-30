@@ -37,27 +37,30 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
             spriteSheet.getHeight() / TEXTURES_PER_COLUMN
         );
 
-        TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 6);
-        TextureRegion[] idleSide = Arrays.copyOfRange(regions[1], 0, 6);
-        TextureRegion[] idleFront = Arrays.copyOfRange(regions[2], 0, 6);
+        TextureRegion[] idleFront = Arrays.copyOfRange(regions[0], 0, 6);
+        TextureRegion[] idleRight = Arrays.copyOfRange(regions[1], 0, 6);
+        TextureRegion[] idleBack = Arrays.copyOfRange(regions[2], 0, 6);
         TextureRegion[] walkFront = Arrays.copyOfRange(regions[3], 0, 6);
-        TextureRegion[] walkSide = Arrays.copyOfRange(regions[4], 0, 6);
+        TextureRegion[] walkRight = Arrays.copyOfRange(regions[4], 0, 6);
         TextureRegion[] walkBack = Arrays.copyOfRange(regions[5], 0, 6);
         TextureRegion[] attackFront = Arrays.copyOfRange(regions[6], 0, 4);
         TextureRegion[] attackSide = Arrays.copyOfRange(regions[7], 0, 4);
         TextureRegion[] attackBack = Arrays.copyOfRange(regions[8], 0, 4);
         TextureRegion[] die = Arrays.copyOfRange(regions[9], 0, 3);
 
+        // Flipped animations
+        TextureRegion[] idleLeft = flipTextureRegions(idleRight);
+        TextureRegion[] walkLeft = flipTextureRegions(walkRight);
+
         animations.put(PlayerAnimation.IdleFront, new Animation<>(FRAME_DURATION, idleFront));
         animations.put(PlayerAnimation.IdleBack, new Animation<>(FRAME_DURATION, idleBack));
-        animations.put(PlayerAnimation.IdleLeft, new Animation<>(FRAME_DURATION, idleSide));
-        animations.put(PlayerAnimation.IdleRight, new Animation<>(FRAME_DURATION, idleFront));
+        animations.put(PlayerAnimation.IdleLeft, new Animation<>(FRAME_DURATION, idleLeft));
+        animations.put(PlayerAnimation.IdleRight, new Animation<>(FRAME_DURATION, idleRight));
 
         animations.put(PlayerAnimation.WalkFront, new Animation<>(FRAME_DURATION, walkFront));
         animations.put(PlayerAnimation.WalkBack, new Animation<>(FRAME_DURATION, walkBack));
-        // TODO: update animation based on player's direction
-        animations.put(PlayerAnimation.WalkLeft, new Animation<>(FRAME_DURATION, walkSide));
-        animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkSide));
+        animations.put(PlayerAnimation.WalkLeft, new Animation<>(FRAME_DURATION, walkLeft));
+        animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkRight));
     }
 
     public PlayerAnimation getAnimationState() {

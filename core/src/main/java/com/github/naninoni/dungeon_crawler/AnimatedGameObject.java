@@ -34,4 +34,17 @@ public abstract class AnimatedGameObject<E extends Enum<E>> extends GameObject {
             scale, scale, 0.0f
         );
     }
+
+    protected static TextureRegion[] flipTextureRegions(final TextureRegion[] regions) {
+        TextureRegion[] copy = new TextureRegion[regions.length];
+
+        // Create a deep copy of the texture data
+        // to not affect the regular (not-flipped) animation
+        for (int i = 0; i < regions.length; i++) {
+            copy[i] = new TextureRegion(regions[i]);
+            copy[i].flip(true, false);
+        }
+
+        return copy;
+    }
 }
