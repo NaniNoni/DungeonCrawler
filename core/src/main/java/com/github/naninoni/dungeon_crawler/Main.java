@@ -76,7 +76,7 @@ public class Main extends ApplicationAdapter {
         }
 
         // Not moving
-        if (direction == Vector2.Zero) {
+        if (direction.equals(Vector2.Zero)) {
             player.setMoving(false);
         }
 
