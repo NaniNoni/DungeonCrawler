@@ -12,12 +12,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import java.util.ArrayList;
+
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
  */
 public class Main extends ApplicationAdapter {
     private Slime slime;
     private Player player;
+    private Chest chest;
+
     private SpriteBatch spriteBatch;
     private float stateTime;
     private OrthographicCamera camera;
@@ -33,6 +37,7 @@ public class Main extends ApplicationAdapter {
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
 
         player = new Player();
+        chest = new Chest();
         slime = new Slime();
 
         // Instantiate a SpriteBatch for drawing and reset the elapsed animation
@@ -54,27 +59,47 @@ public class Main extends ApplicationAdapter {
         // Check for WASD key presses and update direction accordingly
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             direction.y += 1;  // Move up
-            player.setAnimationState(Player.PlayerAnimation.WalkFront);
+            player.setAnimationState(Player.PlayerAnimation.WalkBack);
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             direction.y -= 1;  // Move down
-            player.setAnimationState(Player.PlayerAnimation.WalkBack);
+            player.setAnimationState(Player.PlayerAnimation.WalkFront);
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             direction.x -= 1;  // Move left
             player.setAnimationState(Player.PlayerAnimation.WalkLeft);
+            player.setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             direction.x += 1;  // Move right
             player.setAnimationState(Player.PlayerAnimation.WalkRight);
-        } else {
-            player.setAnimationState(Player.PlayerAnimation.IdleFront);
-            // TODO: figure out last direction and update idle animation
+            player.setMoving(true);
+        }
+
+        // If the player isn't moving, switch to the idle animation for the last direction
+        if (!player.isMoving()) {
+            switch (player.getAnimationState()) {
+                case WalkBack:
+                    player.setAnimationState(Player.PlayerAnimation.IdleBack);
+                    break;
+                case WalkFront:
+                    player.setAnimationState(Player.PlayerAnimation.IdleFront);
+                    break;
+                case WalkLeft:
+                    player.setAnimationState(Player.PlayerAnimation.IdleLeft);
+                    break;
+                case WalkRight:
+                    player.setAnimationState(Player.PlayerAnimation.IdleRight);
+                    break;
+            }
         }
 
         // Normalize translation vector so that the player doesn't move faster diagonally
         direction.nor();
 
+        // Move player based on direction and speed
         Vector2 translation = direction.scl(player.getSpeed() * Gdx.graphics.getDeltaTime());
         player.position.add(translation);
     }
@@ -90,24 +115,11 @@ public class Main extends ApplicationAdapter {
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
 
-        // Get current frame of animation for the current stateTime
-        TextureRegion playerFrame = player.getCurrentFrame(stateTime);
-        TextureRegion slimeFrame = slime.getCurrentFrame(stateTime);
         spriteBatch.begin();
-        float playerWidth = playerFrame.getRegionWidth();
-        float playerHeight = playerFrame.getRegionHeight();
-        float slimeWidth = slimeFrame.getRegionWidth();
-        float slimeHeight = slimeFrame.getRegionHeight();
-        spriteBatch.draw(
-            playerFrame,
-            player.position.x, player.position.y,
-            playerWidth * 2, playerHeight * 2
-        );
-        spriteBatch.draw(
-            slimeFrame,
-            slime.position.x, slime.position.y,
-            slimeWidth * 2, slimeHeight * 2
-        );
+
+        player.draw(spriteBatch, stateTime, 2.0f);
+        chest.draw(spriteBatch, stateTime, 2.0f);
+
         spriteBatch.end();
 
     }
