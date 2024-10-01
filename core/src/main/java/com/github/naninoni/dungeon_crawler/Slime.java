@@ -94,14 +94,14 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     public void input() {
         Vector2 slimeDirection = new Vector2();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.J)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.K)) {
             slimeDirection.y += 1;  // Move up
-            setAnimationState(SlimeAnimation.MoveBack);
+            setAnimationState(SlimeAnimation.MoveFront);
             setMoving(true);
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.K)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.J)) {
             slimeDirection.y -= 1;  // Move down
-            setAnimationState(SlimeAnimation.MoveFront);
+            setAnimationState(SlimeAnimation.MoveBack);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.H)) {
@@ -117,28 +117,32 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         // when Not moving
         if (slimeDirection.equals(Vector2.Zero)) {
             setMoving(false);
-
-            // If the slime isn't moving, switch to the idle animation for the last direction
-            if (!isMoving()) {
-                switch (getAnimationState()) {
-                    case MoveBack:
-                        setAnimationState(SlimeAnimation.IdleBack);
-                        break;
-                    case MoveFront:
-                        setAnimationState(SlimeAnimation.IdleFront);
-                        break;
-                    case MoveLeft:
-                        setAnimationState(SlimeAnimation.IdleLeft);
-                        break;
-                    case MoveRight:
-                        setAnimationState(SlimeAnimation.IdleRight);
-                        break;
-                }
-            }
-
-
         }
 
+        // If the slime isn't moving, switch to the idle animation for the last direction
+        if (!isMoving()) {
+            switch (getAnimationState()) {
+                case MoveBack:
+                    setAnimationState(SlimeAnimation.IdleBack);
+                    break;
+                case MoveFront:
+                    setAnimationState(SlimeAnimation.IdleFront);
+                    break;
+                case MoveLeft:
+                    setAnimationState(SlimeAnimation.IdleLeft);
+                    break;
+                case MoveRight:
+                    setAnimationState(SlimeAnimation.IdleRight);
+                    break;
+            }
+        }
+
+        // Normalize translation vector so that the player doesn't move faster diagonally
+        slimeDirection.nor();
+
+        // Move player based on direction and speed
+        Vector2 translation = slimeDirection.scl(getSpeed() * Gdx.graphics.getDeltaTime());
+        position.add(translation);
     }
     public void dispose() {
         spriteSheet.dispose();

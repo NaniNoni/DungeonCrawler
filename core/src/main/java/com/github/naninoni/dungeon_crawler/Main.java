@@ -52,6 +52,7 @@ public class Main extends ApplicationAdapter {
 
     private void input() {
         player.input();
+        slime.input();
     }
 
     private void draw() {
