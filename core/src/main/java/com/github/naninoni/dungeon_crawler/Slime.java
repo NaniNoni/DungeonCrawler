@@ -1,6 +1,7 @@
 package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,6 +14,8 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     public float getSpeed() {
         return speed;
     }
+
+    private boolean isMoving = false;
 
     public void setSpeed(float speed) {
         this.speed = speed;
@@ -47,26 +50,96 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
 
         //NOTE: any back animation is looking towards the player
         TextureRegion[] idleBack = Arrays.copyOfRange(regions[0], 0, 4);
-        TextureRegion[] idleSide = Arrays.copyOfRange(regions[1], 0, 4);
+        TextureRegion[] idleRight = Arrays.copyOfRange(regions[1], 0, 4);
         TextureRegion[] idleFront = Arrays.copyOfRange(regions[2], 0, 4);
         TextureRegion[] walkBack = Arrays.copyOfRange(regions[3], 0, 6);
-        TextureRegion[] walkSide = Arrays.copyOfRange(regions[4], 0, 6);
+        TextureRegion[] walkRight = Arrays.copyOfRange(regions[4], 0, 6);
         TextureRegion[] walkFront = Arrays.copyOfRange(regions[5], 0, 6);
         TextureRegion[] attackFront = Arrays.copyOfRange(regions[8], 0, 8);
-        TextureRegion[] attackSide = Arrays.copyOfRange(regions[7], 0, 8);
+        TextureRegion[] attackRight = Arrays.copyOfRange(regions[7], 0, 8);
         TextureRegion[] attackBack = Arrays.copyOfRange(regions[6], 0, 8);
         TextureRegion[] die = Arrays.copyOfRange(regions[12], 0, 5);
         //TODO: update animation for getting damage
 
+        TextureRegion[] idleLeft = flipTextureRegions(idleRight);
+        TextureRegion[] walkLeft = flipTextureRegions(walkRight);
+
         animations.put(SlimeAnimation.IdleFront, new Animation<>(FRAME_DURATION, idleFront));
+        animations.put(SlimeAnimation.IdleBack, new Animation<>(FRAME_DURATION, idleBack));
+        animations.put(SlimeAnimation.IdleLeft, new Animation<>(FRAME_DURATION, idleLeft));
+        animations.put(SlimeAnimation.IdleRight, new Animation<>(FRAME_DURATION, idleRight));
 
         animations.put(SlimeAnimation.MoveFront, new Animation<>(FRAME_DURATION, walkFront));
         animations.put(SlimeAnimation.MoveBack, new Animation<>(FRAME_DURATION, walkBack));
-        // TODO: update animation based on slime's direction
-        animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkSide));
-        animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkSide));
+        animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkLeft));
+        animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
     }
 
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setMoving(boolean moving) {
+        isMoving = moving;
+    }
+
+    public SlimeAnimation getAnimationState() {
+        return animationState;
+    }
+
+    public void setAnimationState(Slime.SlimeAnimation animationState) {
+        this.animationState = animationState;
+    }
+
+    public void input() {
+        Vector2 slimeDirection = new Vector2();
+
+        if (Gdx.input.isKeyPressed(Input.Keys.J)) {
+            slimeDirection.y += 1;  // Move up
+            setAnimationState(SlimeAnimation.MoveBack);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.K)) {
+            slimeDirection.y -= 1;  // Move down
+            setAnimationState(SlimeAnimation.MoveFront);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.H)) {
+            slimeDirection.x -= 1;  // Move left
+            setAnimationState(SlimeAnimation.MoveLeft);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.L)) {
+            slimeDirection.x += 1;  // Move right
+            setAnimationState(SlimeAnimation.MoveRight);
+            setMoving(true);
+        }
+        // when Not moving
+        if (slimeDirection.equals(Vector2.Zero)) {
+            setMoving(false);
+
+            // If the slime isn't moving, switch to the idle animation for the last direction
+            if (!isMoving()) {
+                switch (getAnimationState()) {
+                    case MoveBack:
+                        setAnimationState(SlimeAnimation.IdleBack);
+                        break;
+                    case MoveFront:
+                        setAnimationState(SlimeAnimation.IdleFront);
+                        break;
+                    case MoveLeft:
+                        setAnimationState(SlimeAnimation.IdleLeft);
+                        break;
+                    case MoveRight:
+                        setAnimationState(SlimeAnimation.IdleRight);
+                        break;
+                }
+            }
+
+
+        }
+
+    }
     public void dispose() {
         spriteSheet.dispose();
     }
