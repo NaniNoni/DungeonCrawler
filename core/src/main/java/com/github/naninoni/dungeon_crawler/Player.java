@@ -1,12 +1,14 @@
 package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.Arrays;
+import java.util.Vector;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     public enum PlayerAnimation {
@@ -61,6 +63,62 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         animations.put(PlayerAnimation.WalkBack, new Animation<>(FRAME_DURATION, walkBack));
         animations.put(PlayerAnimation.WalkLeft, new Animation<>(FRAME_DURATION, walkLeft));
         animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkRight));
+    }
+
+    public void input() {
+        Vector2 direction = new Vector2();
+
+        // Check for WASD key presses and update direction accordingly
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            direction.y += 1;  // Move up
+            setAnimationState(Player.PlayerAnimation.WalkBack);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            direction.y -= 1;  // Move down
+            setAnimationState(Player.PlayerAnimation.WalkFront);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            direction.x -= 1;  // Move left
+            setAnimationState(Player.PlayerAnimation.WalkLeft);
+            setMoving(true);
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            direction.x += 1;  // Move right
+            setAnimationState(Player.PlayerAnimation.WalkRight);
+            setMoving(true);
+        }
+
+        // Not moving
+        if (direction.equals(Vector2.Zero)) {
+            setMoving(false);
+        }
+
+        // If the player isn't moving, switch to the idle animation for the last direction
+        if (!isMoving()) {
+            switch (getAnimationState()) {
+                case WalkBack:
+                    setAnimationState(Player.PlayerAnimation.IdleBack);
+                    break;
+                case WalkFront:
+                    setAnimationState(Player.PlayerAnimation.IdleFront);
+                    break;
+                case WalkLeft:
+                    setAnimationState(Player.PlayerAnimation.IdleLeft);
+                    break;
+                case WalkRight:
+                    setAnimationState(Player.PlayerAnimation.IdleRight);
+                    break;
+            }
+        }
+
+        // Normalize translation vector so that the player doesn't move faster diagonally
+        direction.nor();
+
+        // Move player based on direction and speed
+        Vector2 translation = direction.scl(getSpeed() * Gdx.graphics.getDeltaTime());
+        position.add(translation);
     }
 
     public PlayerAnimation getAnimationState() {
