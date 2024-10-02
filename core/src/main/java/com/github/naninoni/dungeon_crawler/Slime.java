@@ -148,11 +148,14 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         Vector2 playerPos = Player.getInstance().position;
         // Move towards playerPos
         Vector2 direction = new Vector2(playerPos).sub(position);
-        direction.nor();
+        float distancetoPlayer = direction.len();
 
-        // Move the slime
-        Vector2 translation = direction.scl(speed);
-        position.add(translation);
+        if (distancetoPlayer > 0.5f) {
+            direction.nor();
+            Vector2 translation = direction.scl(speed);
+            position.add(translation);
+
+        }
 
         // Determining angle based on dir of player
         float angle = direction.angleDeg();
@@ -168,7 +171,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         }
 
         // when slime doesn't move switch to idle animation
-        if (translation.isZero()) {
+        if (distancetoPlayer <= 0.5f) {
             switch (getAnimationState()) {
                 case MoveFront:
                     setAnimationState(SlimeAnimation.IdleBack);
