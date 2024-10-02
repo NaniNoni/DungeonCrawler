@@ -144,6 +144,12 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         Vector2 translation = slimeDirection.scl(getSpeed() * Gdx.graphics.getDeltaTime());
         position.add(translation);
     }
+    public void move() {
+        Vector2 playerPos = Player.getInstance().position;
+        // Move towards playerPos
+
+    }
+
     public void dispose() {
         spriteSheet.dispose();
     }

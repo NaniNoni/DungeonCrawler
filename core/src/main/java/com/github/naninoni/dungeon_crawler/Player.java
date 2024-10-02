@@ -11,6 +11,14 @@ import java.util.Arrays;
 import java.util.Vector;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
+    private static Player instance;
+
+    public static Player getInstance() {
+        if (instance == null) {
+            instance = new Player();
+        }
+        return instance;
+    }
     public enum PlayerAnimation {
         IdleFront,
         IdleBack,

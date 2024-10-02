@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class Main extends ApplicationAdapter {
     private Slime slime;
-    private Player player;
     private Chest chest;
 
     private SpriteBatch spriteBatch;
@@ -32,7 +31,6 @@ public class Main extends ApplicationAdapter {
         viewport.apply();
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
 
-        player = new Player();
         chest = new Chest();
         slime = new Slime();
 
@@ -47,11 +45,15 @@ public class Main extends ApplicationAdapter {
     // But the LibGDX loop function is called render. The "real" render function is draw.
     public void render() {
         input();
+        logic();
         draw();
     }
 
+    private void logic() {
+        slime.move();
+    }
     private void input() {
-        player.input();
+        Player.getInstance().input();
         slime.input();
     }
 
@@ -65,7 +67,7 @@ public class Main extends ApplicationAdapter {
 
         spriteBatch.begin();
 
-        player.draw(spriteBatch, stateTime, 2.0f);
+        Player.getInstance().draw(spriteBatch, stateTime, 2.0f);
         chest.draw(spriteBatch, stateTime, 2.0f);
         slime.draw(spriteBatch, stateTime, 2.0f);
 
@@ -80,7 +82,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        player.dispose();
+        Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
     }
