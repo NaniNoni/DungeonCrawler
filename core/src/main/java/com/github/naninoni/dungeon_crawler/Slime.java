@@ -32,8 +32,8 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         MoveLeft,
         MoveRight
     }
-
-    private float speed = 200f;
+    // TODO: change animation to UP/DOWN instead of front back
+    private float speed = 1f;
     Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
@@ -144,6 +144,51 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         Vector2 translation = slimeDirection.scl(getSpeed() * Gdx.graphics.getDeltaTime());
         position.add(translation);
     }
+    public void move() {
+        Vector2 playerPos = Player.getInstance().position;
+        // Move towards playerPos
+        Vector2 direction = new Vector2(playerPos).sub(position);
+        float distancetoPlayer = direction.len();
+
+        if (distancetoPlayer > 0.5f) {
+            direction.nor();
+            Vector2 translation = direction.scl(speed);
+            position.add(translation);
+
+        }
+
+        // Determining angle based on dir of player
+        float angle = direction.angleDeg();
+
+        if (angle >= 45 && angle < 135) {
+            setAnimationState(SlimeAnimation.MoveFront);
+        } else if (angle >= 135 && angle < 225) {
+            setAnimationState(SlimeAnimation.MoveLeft);
+        } else if (angle >= 225 && angle < 315) {
+            setAnimationState(SlimeAnimation.MoveBack);
+        } else {
+            setAnimationState(SlimeAnimation.MoveRight);
+        }
+
+        // when slime doesn't move switch to idle animation
+        if (distancetoPlayer <= 0.5f) {
+            switch (getAnimationState()) {
+                case MoveFront:
+                    setAnimationState(SlimeAnimation.IdleBack);
+                    break;
+                case MoveBack:
+                    setAnimationState(SlimeAnimation.IdleFront);
+                    break;
+                case MoveLeft:
+                    setAnimationState(SlimeAnimation.IdleLeft);
+                    break;
+                case MoveRight:
+                    setAnimationState(SlimeAnimation.IdleRight);
+                    break;
+            }
+        }
+    }
+
     public void dispose() {
         spriteSheet.dispose();
     }
