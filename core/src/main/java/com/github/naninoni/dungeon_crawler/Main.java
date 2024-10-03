@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 public class Main extends ApplicationAdapter {
     private Slime slime;
     private Chest chest;
+    private Terrain terrain;
 
     private SpriteBatch spriteBatch;
     private float stateTime;
@@ -40,6 +41,7 @@ public class Main extends ApplicationAdapter {
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
         camera = new OrthographicCamera();
+        terrain = new Terrain(new Vector2(0,0), 100, 100, 1f);
         camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
 
         Texture tiles = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
@@ -103,5 +105,6 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
+        terrain.dispose();
     }
 }
