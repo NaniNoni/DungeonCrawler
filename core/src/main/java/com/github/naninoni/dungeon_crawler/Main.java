@@ -43,17 +43,17 @@ public class Main extends ApplicationAdapter {
         camera = new OrthographicCamera();
         terrain = new Terrain(new Vector2(0,0), 100, 100, 1f);
         camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
-
         Texture tiles = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
         TextureRegion[][] splitTiles = TextureRegion.split(tiles, 16, 16);
         TiledMap map = new TiledMap();
         MapLayers layers = map.getLayers();
         for (int l = 0; l < 20; l++) {
-            TiledMapTileLayer layer = new TiledMapTileLayer(25, 25, 16, 16);
+            TiledMapTileLayer layer = new TiledMapTileLayer(100, 100, 16, 16);
             for (int x = 0; x < 150; x++) {
                 for (int y = 0; y < 100; y++) {
-                    int ty = (int)(Math.random() * splitTiles.length);
-                    int tx = (int)(Math.random() * splitTiles[ty].length);
+                    float noiseValue = terrain.PerlinNoise(x * 0.1f, y * 0.1f);
+                    int ty = (int)(noiseValue * (splitTiles.length - 1));
+                    int tx = (int)(noiseValue * (splitTiles[ty].length - 1)); //ensuring ty, tx is within bounds
                     TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                     cell.setTile(new StaticTiledMapTile(splitTiles[ty][tx]));
                     layer.setCell(x, y, cell);

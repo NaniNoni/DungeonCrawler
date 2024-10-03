@@ -96,7 +96,7 @@ public class Terrain extends GameObject{
     }
 
 
-    private float PerlinNoise(float x, float y) {
+    public float PerlinNoise(float x, float y) {
         // Find unit grid cell containing point
         int X = (int) Math.floor(x) & 255;
         int Y = (int) Math.floor(y) & 255;
