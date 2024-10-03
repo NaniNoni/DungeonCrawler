@@ -5,9 +5,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapLayers;
+import com.badlogic.gdx.maps.MapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
@@ -20,16 +29,37 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch spriteBatch;
     private float stateTime;
     private OrthographicCamera camera;
-    private FitViewport viewport;
+    private ExtendViewport viewport;
+    OrthogonalTiledMapRenderer renderer;
 
     @Override
     public void create() {
-        camera = new OrthographicCamera();
+        float width = Gdx.graphics.getWidth();
+        float height = Gdx.graphics.getHeight();
+
         final float WORLD_WIDTH = 800;
-        final float WORLD_HEIGHT = 600;
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
-        viewport.apply();
-        camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
+        final float WORLD_HEIGHT = 800;
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
+
+        Texture tiles = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
+        TextureRegion[][] splitTiles = TextureRegion.split(tiles, 16, 16);
+        TiledMap map = new TiledMap();
+        MapLayers layers = map.getLayers();
+        for (int l = 0; l < 20; l++) {
+            TiledMapTileLayer layer = new TiledMapTileLayer(25, 25, 16, 16);
+            for (int x = 0; x < 150; x++) {
+                for (int y = 0; y < 100; y++) {
+                    int ty = (int)(Math.random() * splitTiles.length);
+                    int tx = (int)(Math.random() * splitTiles[ty].length);
+                    TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
+                    cell.setTile(new StaticTiledMapTile(splitTiles[ty][tx]));
+                    layer.setCell(x, y, cell);
+                }
+            }
+            layers.add(layer);
+        }
+        renderer = new OrthogonalTiledMapRenderer(map);
 
         chest = new Chest();
         slime = new Slime();
@@ -52,6 +82,7 @@ public class Main extends ApplicationAdapter {
     private void logic() {
         slime.move();
     }
+
     private void input() {
         Player.getInstance().input();
         slime.input();
@@ -63,21 +94,8 @@ public class Main extends ApplicationAdapter {
 
         // Update camera
         camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
-
-        spriteBatch.begin();
-
-        Player.getInstance().draw(spriteBatch, stateTime, 2.0f);
-        chest.draw(spriteBatch, stateTime, 2.0f);
-        slime.draw(spriteBatch, stateTime, 2.0f);
-
-        spriteBatch.end();
-
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height, true);
+        renderer.setView(camera);
+        renderer.render();
     }
 
     @Override
