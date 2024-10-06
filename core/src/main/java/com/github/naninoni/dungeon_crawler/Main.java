@@ -2,22 +2,12 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapLayers;
-import com.badlogic.gdx.maps.MapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
@@ -41,27 +31,10 @@ public class Main extends ApplicationAdapter {
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
         camera = new OrthographicCamera();
-        terrain = new Terrain(new Vector2(0,0), 100, 100, 1f);
+        terrain = new Terrain(100, 100);
         camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
-        Texture tiles = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
-        TextureRegion[][] splitTiles = TextureRegion.split(tiles, 16, 16);
-        TiledMap map = new TiledMap();
-        MapLayers layers = map.getLayers();
-        for (int l = 0; l < 20; l++) {
-            TiledMapTileLayer layer = new TiledMapTileLayer(100, 100, 16, 16);
-            for (int x = 0; x < 150; x++) {
-                for (int y = 0; y < 100; y++) {
-                    float noiseValue = terrain.PerlinNoise(x * 0.1f, y * 0.1f);
-                    int ty = (int)(noiseValue * (splitTiles.length - 1));
-                    int tx = (int)(noiseValue * (splitTiles[ty].length - 1)); //ensuring ty, tx is within bounds
-                    TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                    cell.setTile(new StaticTiledMapTile(splitTiles[ty][tx]));
-                    layer.setCell(x, y, cell);
-                }
-            }
-            layers.add(layer);
-        }
-        renderer = new OrthogonalTiledMapRenderer(map);
+
+        renderer = new OrthogonalTiledMapRenderer(terrain.getTileMap());
 
         chest = new Chest();
         slime = new Slime();
