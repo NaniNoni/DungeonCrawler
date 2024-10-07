@@ -2,13 +2,12 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
@@ -16,20 +15,26 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 public class Main extends ApplicationAdapter {
     private Slime slime;
     private Chest chest;
+    private Terrain terrain;
 
     private SpriteBatch spriteBatch;
     private float stateTime;
     private OrthographicCamera camera;
-    private FitViewport viewport;
+    private ExtendViewport viewport;
+    OrthogonalTiledMapRenderer renderer;
 
     @Override
     public void create() {
-        camera = new OrthographicCamera();
+        float width = Gdx.graphics.getWidth();
+        float height = Gdx.graphics.getHeight();
+
         final float WORLD_WIDTH = 800;
-        final float WORLD_HEIGHT = 600;
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
-        viewport.apply();
-        camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
+        final float WORLD_HEIGHT = 800;
+        camera = new OrthographicCamera();
+        terrain = new Terrain(100, 100);
+        camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
+
+        renderer = new OrthogonalTiledMapRenderer(terrain.getTileMap());
 
         chest = new Chest();
         slime = new Slime();
@@ -52,6 +57,7 @@ public class Main extends ApplicationAdapter {
     private void logic() {
         slime.move();
     }
+
     private void input() {
         Player.getInstance().input();
         slime.input();
@@ -62,22 +68,13 @@ public class Main extends ApplicationAdapter {
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
         // Update camera
-        camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
-
         spriteBatch.begin();
-
-        Player.getInstance().draw(spriteBatch, stateTime, 2.0f);
-        chest.draw(spriteBatch, stateTime, 2.0f);
-        slime.draw(spriteBatch, stateTime, 2.0f);
-
+        camera.update();
+        renderer.setView(camera);
+        renderer.render();
+        Player.getInstance().draw(spriteBatch, stateTime, 2f);
+        chest.draw(spriteBatch, stateTime, 2f);
         spriteBatch.end();
-
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height, true);
     }
 
     @Override
@@ -85,5 +82,6 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
+        terrain.dispose();
     }
 }
