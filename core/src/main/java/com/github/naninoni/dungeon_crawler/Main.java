@@ -68,9 +68,13 @@ public class Main extends ApplicationAdapter {
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
         // Update camera
+        spriteBatch.begin();
         camera.update();
         renderer.setView(camera);
         renderer.render();
+        Player.getInstance().draw(spriteBatch, stateTime, 2f);
+        chest.draw(spriteBatch, stateTime, 2f);
+        spriteBatch.end();
     }
 
     @Override
