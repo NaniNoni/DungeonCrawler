@@ -53,24 +53,24 @@ public class Terrain implements Disposable {
     }
 
     private void generateHeightMap() {
-        TiledMapTileLayer layer = new TiledMapTileLayer(width, height, TILE_WIDTH, TILE_HEIGHT);
+        TiledMapTileLayer terrainLayer = new TiledMapTileLayer(width, height, TILE_WIDTH, TILE_HEIGHT);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                float noiseValue = perlinNoise(x * 0.1f, y * 0.1f);  // Scaling noise
+                float noiseValue = perlinNoise(x * 0.1f, y * 0.1f);
                 System.out.println(noiseValue);
-                heightMap[x][y] = noiseValue;  // Assign noise value to the height map
+                heightMap[x][y] = noiseValue;
 
                 int textureY = (int) (noiseValue * (splitTiles.length - 1));
                 int textureX = (int) (noiseValue * (splitTiles[0].length - 1));
 
                 TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
                 cell.setTile(new StaticTiledMapTile(splitTiles[textureY][textureX]));
-                layer.setCell(x, y, cell);
+                terrainLayer.setCell(x, y, cell);
             }
         }
 
-        tileMap.getLayers().add(layer);
+        tileMap.getLayers().add(terrainLayer);
     }
 
     public TiledMap getTileMap() {
@@ -114,7 +114,7 @@ public class Terrain implements Disposable {
 
     /**
      * Perlin noise generation function.
-     * Made with reference to the [Understanding Perlin Noise](https://adrianb.io/2014/08/09/perlinnoise.html) algorithm.
+     * Made with reference to the <a href="https://adrianb.io/2014/08/09/perlinnoise.html">Understanding Perlin Noise</a>) article.
      *
      * @param x The x coordinate
      * @param y The y coordinate
@@ -123,7 +123,6 @@ public class Terrain implements Disposable {
     public float perlinNoise(float x, float y) {
         // Step 1:
         // Divide x, y coordinates into unit cells.
-        // In other words, find [x, y] % 1 to find the coordinate's location within the square.
 
         // These represent the unit square the out coordinate is in.
         // We bind these in the range [0, 255] to avoid overflow error later.
@@ -142,8 +141,8 @@ public class Terrain implements Disposable {
          */
 
         // obtaining fractional part of the coordinates to get varied results
-        x = x - MathUtils.floor(x);
-        y = y - MathUtils.floor(y);
+        x = x - MathUtils.floorPositive(x);
+        y = y - MathUtils.floorPositive(y);
 
         // Compute fade curves for x, y
         float u = fade(x);

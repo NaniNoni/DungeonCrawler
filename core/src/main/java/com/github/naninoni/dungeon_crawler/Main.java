@@ -21,7 +21,7 @@ public class Main extends ApplicationAdapter {
     private float stateTime;
     private OrthographicCamera camera;
     private ExtendViewport viewport;
-    OrthogonalTiledMapRenderer renderer;
+    private OrthogonalTiledMapRenderer renderer;
 
     @Override
     public void create() {
