@@ -22,16 +22,12 @@ public abstract class AnimatedGameObject<E extends Enum<E>> extends GameObject {
         return animations.get(animationState).getKeyFrame(stateTime, true);
     }
 
-    public void draw(SpriteBatch batch, float stateTime, float scale) {
+    public void draw(SpriteBatch batch, float stateTime) {
         TextureRegion currentFrame = getCurrentFrame(stateTime);
 
         batch.draw(
             currentFrame,
-            position.x, position.y,
-            position.x / 2, position.y / 2,
-            currentFrame.getRegionWidth(),
-            currentFrame.getRegionHeight(),
-            scale, scale, 0.0f
+            position.x, position.y
         );
     }
 

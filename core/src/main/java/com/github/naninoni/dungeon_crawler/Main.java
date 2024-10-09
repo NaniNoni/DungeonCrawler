@@ -3,9 +3,7 @@ package com.github.naninoni.dungeon_crawler;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -19,22 +17,14 @@ public class Main extends ApplicationAdapter {
 
     private SpriteBatch spriteBatch;
     private float stateTime;
-    private OrthographicCamera camera;
     private ExtendViewport viewport;
-    private OrthogonalTiledMapRenderer renderer;
 
     @Override
     public void create() {
-        float width = Gdx.graphics.getWidth();
-        float height = Gdx.graphics.getHeight();
-
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
-        camera = new OrthographicCamera();
+        viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         terrain = new Terrain(100, 100);
-        camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
-
-        renderer = new OrthogonalTiledMapRenderer(terrain.getTileMap());
 
         chest = new Chest();
         slime = new Slime();
@@ -59,7 +49,7 @@ public class Main extends ApplicationAdapter {
     }
 
     private void input() {
-        Player.getInstance().input();
+        Player.getInstance().input(viewport);
         slime.input();
     }
 
@@ -67,14 +57,21 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(Color.BLACK);
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
         // Update camera
         spriteBatch.begin();
-        camera.update();
-        renderer.setView(camera);
-        renderer.render();
-        Player.getInstance().draw(spriteBatch, stateTime, 2f);
-        chest.draw(spriteBatch, stateTime, 2f);
+
+        terrain.draw(viewport.getCamera());
+        Player.getInstance().draw(spriteBatch, stateTime);
+        chest.draw(spriteBatch, stateTime);
+
         spriteBatch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 
     @Override

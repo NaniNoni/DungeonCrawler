@@ -1,10 +1,13 @@
 package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
@@ -17,6 +20,7 @@ public class Terrain implements Disposable {
     private final int height;
     private final float[][] heightMap;
     private final TiledMap tileMap = new TiledMap();
+    private OrthogonalTiledMapRenderer renderer = new OrthogonalTiledMapRenderer(tileMap);
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
     private final TextureRegion[][] splitTiles = TextureRegion.split(spriteSheet, TILE_WIDTH, TILE_HEIGHT);
     // The permutations used for the Perlin noise
@@ -73,8 +77,9 @@ public class Terrain implements Disposable {
         tileMap.getLayers().add(terrainLayer);
     }
 
-    public TiledMap getTileMap() {
-        return tileMap;
+    public void draw(Camera camera) {
+        renderer.setView((OrthographicCamera) camera);
+        renderer.render();
     }
 
     /**

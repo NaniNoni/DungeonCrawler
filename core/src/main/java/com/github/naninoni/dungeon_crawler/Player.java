@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -19,6 +20,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         }
         return instance;
     }
+
     public enum PlayerAnimation {
         IdleFront,
         IdleBack,
@@ -73,7 +75,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkRight));
     }
 
-    public void input() {
+    public void input(Viewport viewport) {
         Vector2 direction = new Vector2();
 
         // Check for WASD key presses and update direction accordingly
@@ -127,6 +129,9 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         // Move player based on direction and speed
         Vector2 translation = direction.scl(getSpeed() * Gdx.graphics.getDeltaTime());
         position.add(translation);
+
+        // Have the camera follow the player
+        viewport.getCamera().position.set(position.x, position.y, 0);
     }
 
     public PlayerAnimation getAnimationState() {
