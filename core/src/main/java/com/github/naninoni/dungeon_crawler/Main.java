@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 public class Main extends ApplicationAdapter {
     private Slime slime;
     private Chest chest;
-    private Terrain terrain;
+    private ChunkManager chunkManager;
 
     private SpriteBatch spriteBatch;
     private float stateTime;
@@ -24,7 +24,7 @@ public class Main extends ApplicationAdapter {
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
         viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
-        terrain = new Terrain(100, 100);
+        chunkManager = new ChunkManager();
 
         chest = new Chest();
         slime = new Slime();
@@ -62,7 +62,6 @@ public class Main extends ApplicationAdapter {
         // Update camera
         spriteBatch.begin();
 
-        terrain.draw(viewport.getCamera());
         Player.getInstance().draw(spriteBatch, stateTime);
         chest.draw(spriteBatch, stateTime);
 
@@ -79,6 +78,5 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
-        terrain.dispose();
     }
 }
