@@ -1,5 +1,8 @@
 package com.github.naninoni.dungeon_crawler;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -29,6 +32,8 @@ public class ChunkManager {
                 for (int y = 0; y < Chunk.CHUNK_SIZE; y++) {
                     // 1. Figure out what textures correspond to which noise data
                     // 2. Figure out where to place the textures in the tile map
+                    int tx = MathUtils.floorPositive(x);
+                    int ty = MathUtils.floorPositive(y);
                 }
             }
         }
