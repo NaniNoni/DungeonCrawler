@@ -62,8 +62,9 @@ public class Main extends ApplicationAdapter {
         // Update camera
         spriteBatch.begin();
 
-        Player.getInstance().draw(spriteBatch, stateTime);
+        chunkManager.render(spriteBatch);
         chest.draw(spriteBatch, stateTime);
+        Player.getInstance().draw(spriteBatch, stateTime);
 
         spriteBatch.end();
     }
