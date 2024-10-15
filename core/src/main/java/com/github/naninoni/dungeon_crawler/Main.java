@@ -2,8 +2,12 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -32,7 +36,20 @@ public class Main extends ApplicationAdapter {
         // Instantiate a SpriteBatch for drawing and reset the elapsed animation
         // time to 0
         spriteBatch = new SpriteBatch();
-        stateTime = 0f;
+        stateTime = 0f;// Register the input processor to handle scroll events
+
+        // On-scroll callback
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
+
+                // Zoom in when scrolling down (amountY is negative), zoom out when scrolling up
+                camera.zoom = MathUtils.clamp(camera.zoom + amountY * 0.1f, 0.1f, 2.0f);
+                camera.update();
+                return true;
+            }
+        });
     }
 
     @Override
