@@ -1,6 +1,7 @@
 package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.NumberUtils;
 
 /**
  * An extremely simple 2D vector that takes in `int`s
@@ -50,6 +51,17 @@ public class Vector2i {
         this.x += x;
         this.y += y;
         return this;
+    }
+
+    @Override
+    public boolean equals (Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Vector2i other = (Vector2i)obj;
+        if (x != other.x) return false;
+        if (y != other.y) return false;
+        return true;
     }
 
     /**

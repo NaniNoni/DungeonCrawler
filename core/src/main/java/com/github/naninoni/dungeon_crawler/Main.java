@@ -57,11 +57,12 @@ public class Main extends ApplicationAdapter {
     // But the LibGDX loop function is called render. The "real" render function is draw.
     public void render() {
         input();
-        logic();
+        update();
         draw();
     }
 
-    private void logic() {
+    private void update() {
+        chunkManager.update();
         slime.move();
     }
 
@@ -79,8 +80,9 @@ public class Main extends ApplicationAdapter {
         // Update camera
         spriteBatch.begin();
 
-        chunkManager.render(spriteBatch);
+        chunkManager.draw(spriteBatch);
         chest.draw(spriteBatch, stateTime);
+        slime.draw(spriteBatch, stateTime);
         Player.getInstance().draw(spriteBatch, stateTime);
 
         spriteBatch.end();

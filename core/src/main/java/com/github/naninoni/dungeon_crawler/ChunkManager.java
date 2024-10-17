@@ -9,12 +9,33 @@ import java.util.Map;
 
 public class ChunkManager {
     private final Map<Vector2i, Chunk> chunks = new HashMap<Vector2i, Chunk>();
+    private Vector2i previousPlayerChunk;
 
     public ChunkManager() {
         updateChunks();
     }
 
+    /**
+     * Runs every frame.
+     */
+    public void update() {
+        Vector2 playerPos = Player.getInstance().position;
+        int playerChunkX = (int) (playerPos.x / Chunk.CHUNK_SIZE);
+        int playerChunkY = (int) (playerPos.y / Chunk.CHUNK_SIZE);
+        Vector2i currentPlayerChunk = new Vector2i(playerChunkX, playerChunkY);
+
+        System.out.println(currentPlayerChunk);
+
+        if (!currentPlayerChunk.equals(previousPlayerChunk)) {
+            updateChunks();
+            previousPlayerChunk = currentPlayerChunk;
+        }
+
+        // Figure out if we should load new chunks
+    }
+
     public void updateChunks() {
+        System.out.println("Regenerating chunks!");
         Vector2 playerPos = Player.getInstance().position;
         int playerChunkX = (int) (playerPos.x / Chunk.CHUNK_SIZE);
         int playerChunkY = (int) (playerPos.y / Chunk.CHUNK_SIZE);
@@ -45,9 +66,9 @@ public class ChunkManager {
         }
     }
 
-    public void render(SpriteBatch batch) {
+    public void draw(SpriteBatch batch) {
         for (Chunk chunk : chunks.values()) {
-            chunk.render(batch);
+            chunk.draw(batch);
         }
     }
 }

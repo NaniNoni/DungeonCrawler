@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
 public class Chunk {
-    public final static int CHUNK_SIZE = 100;
+    public final static int CHUNK_SIZE = 200;
 
     private final static int TILE_SIZE = 16;
     private final static Texture spriteSheet = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
@@ -33,7 +33,7 @@ public class Chunk {
         }
     }
 
-    public void render(SpriteBatch batch) {
+    public void draw(SpriteBatch batch) {
         for (int x = 0; x < Chunk.CHUNK_SIZE; x++) {
             for (int y = 0; y < Chunk.CHUNK_SIZE; y++) {
                 Vector2i textureCoordinates = textureMap[x][y];
