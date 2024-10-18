@@ -1,8 +1,5 @@
 package com.github.naninoni.dungeon_crawler;
 
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.NumberUtils;
-
 /**
  * An extremely simple 2D vector that takes in `int`s
  * VERY LOOSELY based on the LibGDX Vector2
@@ -53,15 +50,34 @@ public class Vector2i {
         return this;
     }
 
+
+    /**
+     * Hash function necessary for using this type for hashes, like in a HashMap.
+     *
+     * @return The generated hash.
+     */
     @Override
-    public boolean equals (Object obj) {
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + x;
+        result = prime * result + y;
+        return result;
+    }
+
+    /**
+     * Method used to compare the data of another object.
+     *
+     * @param obj the other object (could be Vector2i)
+     */
+    @Override
+    public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        Vector2i other = (Vector2i)obj;
-        if (x != other.x) return false;
-        if (y != other.y) return false;
-        return true;
+
+        Vector2i other = (Vector2i) obj;
+        return x == other.x && y == other.y;
     }
 
     /**

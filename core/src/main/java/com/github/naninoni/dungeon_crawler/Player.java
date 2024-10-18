@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -137,6 +138,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     public PlayerAnimation getAnimationState() {
         return animationState;
     }
+
     public void setAnimationState(PlayerAnimation animationState) {
         this.animationState = animationState;
     }
@@ -156,6 +158,17 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     public void setMoving(boolean moving) {
         isMoving = moving;
     }
+
+    /**
+     * @return The position of the chunk the player is currently in.
+     */
+    public Vector2i getChunk() {
+        return new Vector2i(
+            MathUtils.floor(position.x / Chunk.CHUNK_SIZE),
+            MathUtils.floor(position.y / Chunk.CHUNK_SIZE)
+        );
+    }
+
     public void dispose() {
         spriteSheet.dispose();
     }
