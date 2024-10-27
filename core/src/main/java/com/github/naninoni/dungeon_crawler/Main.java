@@ -2,10 +2,11 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -15,34 +16,39 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 public class Main extends ApplicationAdapter {
     private Slime slime;
     private Chest chest;
-    private Terrain terrain;
+    private ChunkManager chunkManager;
 
     private SpriteBatch spriteBatch;
     private float stateTime;
-    private OrthographicCamera camera;
     private ExtendViewport viewport;
-    private OrthogonalTiledMapRenderer renderer;
 
     @Override
     public void create() {
-        float width = Gdx.graphics.getWidth();
-        float height = Gdx.graphics.getHeight();
-
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
-        camera = new OrthographicCamera();
-        terrain = new Terrain(100, 100);
-        camera.setToOrtho(false, (width / height) * WORLD_WIDTH, WORLD_HEIGHT);
-
-        renderer = new OrthogonalTiledMapRenderer(terrain.getTileMap());
+        viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
+        chunkManager = new ChunkManager();
 
         chest = new Chest();
         slime = new Slime();
 
-        // Instantiate a SpriteBatch for drawing and reset the elapsed animation
-        // time to 0
+        // This sprite batch is used to draw everything.
+        // TODO: check if this is optimal
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
+
+        // On-scroll callback
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
+
+                // Zoom in when scrolling down (amountY is negative), zoom out when scrolling up
+                camera.zoom = MathUtils.clamp(camera.zoom + amountY * 0.1f, 0.1f, 2.0f);
+                camera.update();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -50,16 +56,17 @@ public class Main extends ApplicationAdapter {
     // But the LibGDX loop function is called render. The "real" render function is draw.
     public void render() {
         input();
-        logic();
+        update();
         draw();
     }
 
-    private void logic() {
+    private void update() {
+        chunkManager.update();
         slime.move();
     }
 
     private void input() {
-        Player.getInstance().input();
+        Player.getInstance().input(viewport);
         slime.input();
     }
 
@@ -67,14 +74,22 @@ public class Main extends ApplicationAdapter {
         ScreenUtils.clear(Color.BLACK);
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
         // Update camera
         spriteBatch.begin();
-        camera.update();
-        renderer.setView(camera);
-        renderer.render();
-        Player.getInstance().draw(spriteBatch, stateTime, 2f);
-        chest.draw(spriteBatch, stateTime, 2f);
+
+        chunkManager.draw(spriteBatch);
+        chest.draw(spriteBatch, stateTime);
+        slime.draw(spriteBatch, stateTime);
+        Player.getInstance().draw(spriteBatch, stateTime);
+
         spriteBatch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 
     @Override
@@ -82,6 +97,5 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
-        terrain.dispose();
     }
 }

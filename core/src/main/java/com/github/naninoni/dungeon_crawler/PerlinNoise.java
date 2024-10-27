@@ -1,46 +1,33 @@
 package com.github.naninoni.dungeon_crawler;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Disposable;
 
-public class Terrain implements Disposable {
-    private final int TILE_WIDTH = 16;
-    private final int TILE_HEIGHT = 16;
+/**
+ * Perlin noise utility class. DO NOT INSTANTIATE.
+ */
+public final class PerlinNoise {
+    private PerlinNoise() {} // default Private constructor to throw on instantiation
 
-    private final int width;
-    private final int height;
-    private final float[][] heightMap;
-    private final TiledMap tileMap = new TiledMap();
-    private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
-    private final TextureRegion[][] splitTiles = TextureRegion.split(spriteSheet, TILE_WIDTH, TILE_HEIGHT);
-    // The permutations used for the Perlin noise
-    private final int[] p = new int[512];
+    private static final int[] p = new int[512];
 
-    public Terrain(int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.heightMap = new float[width][height];
-
+    // Static class initializer
+    // Called when the class is loaded
+    static {
         initPerms();
-        generateHeightMap();
     }
 
-    private void initPerms() {
+    private static void initPerms() {
         int[] basePerm = new int[256];
         for (int i = 0; i < 256; i++) {
             basePerm[i] = i;
         }
 
+        // Fisher-Yates shuffle
+        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
         for (int i = 255; i > 0; i--) {
-            int random = MathUtils.random(basePerm[i]);
+            int random = MathUtils.random(i);
             int temp = basePerm[i];
-            basePerm[i] = basePerm[temp];
+            basePerm[i] = basePerm[random];
             basePerm[random] = temp;
         }
 
@@ -48,40 +35,16 @@ public class Terrain implements Disposable {
         // when xi and yi = 255. Then, accessing at xi + 1 or yi + 1 is an overflow.
         for (int i = 0; i < 256; i++) {
             p[i] = basePerm[i];
-            p[i + 256] = i;
+            p[i + 256] = basePerm[i];
         }
     }
 
-    private void generateHeightMap() {
-        TiledMapTileLayer terrainLayer = new TiledMapTileLayer(width, height, TILE_WIDTH, TILE_HEIGHT);
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                float noiseValue = perlinNoise(x * 0.1f, y * 0.1f);
-                System.out.println(noiseValue);
-                heightMap[x][y] = noiseValue;
-
-                int textureY = (int) (noiseValue * (splitTiles.length - 1));
-                int textureX = (int) (noiseValue * (splitTiles[0].length - 1));
-
-                TiledMapTileLayer.Cell cell = new TiledMapTileLayer.Cell();
-                cell.setTile(new StaticTiledMapTile(splitTiles[textureY][textureX]));
-                terrainLayer.setCell(x, y, cell);
-            }
-        }
-
-        tileMap.getLayers().add(terrainLayer);
-    }
-
-    public TiledMap getTileMap() {
-        return tileMap;
-    }
 
     /**
      * Fade function as defined by Ken Perlin.
      * 6t^5 - 15t^4 + 10t^3
      */
-    private float fade(float t) {
+    private static float fade(float t) {
         return t * t * t * (t * (t * 6 - 15) + 10);
     }
 
@@ -94,7 +57,7 @@ public class Terrain implements Disposable {
      * (1,0,1),(-1,0,1),(1,0,-1),(-1,0,-1),
      * (0,1,1),(0,-1,1),(0,1,-1),(0,-1,-1)
      */
-    private float grad(int hash, float x, float y) {
+    private static float grad(int hash, float x, float y) {
         // Take the hashed value and take the first 3 bits of it
         // (h id in the range [0, 7])
         int h = hash & 0b111;
@@ -120,7 +83,7 @@ public class Terrain implements Disposable {
      * @param y The y coordinate
      * @return The perlin noise value between 0 and 1
      */
-    public float perlinNoise(float x, float y) {
+    public static float perlinNoise(float x, float y) {
         // Step 1:
         // Divide x, y coordinates into unit cells.
 
@@ -141,8 +104,8 @@ public class Terrain implements Disposable {
          */
 
         // obtaining fractional part of the coordinates to get varied results
-        x = x - MathUtils.floorPositive(x);
-        y = y - MathUtils.floorPositive(y);
+        x = x - MathUtils.floor(x);
+        y = y - MathUtils.floor(y);
 
         // Compute fade curves for x, y
         float u = fade(x);
@@ -170,9 +133,4 @@ public class Terrain implements Disposable {
         // Scale result to [0,1]
         return (res + 1) / 2;
     }
-
-    public void dispose() {
-        spriteSheet.dispose();
-    }
 }
-
