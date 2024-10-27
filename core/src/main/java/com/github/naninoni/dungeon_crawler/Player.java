@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Arrays;
-import java.util.Vector;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     private static Player instance;
