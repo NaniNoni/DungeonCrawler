@@ -35,7 +35,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     }
 
     private boolean isMoving = false;
-    private float speed = 400f;
+    private final float speed = 400f;
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
 
     public Player() {
@@ -77,32 +77,32 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     }
 
     public void input(Viewport viewport) {
-        Vector2 direction = new Vector2();
+        Vector2 translation = new Vector2();
 
         // Check for WASD key presses and update direction accordingly
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            direction.y += 1;  // Move up
+            translation.y += 1;  // Move up
             setAnimationState(Player.PlayerAnimation.WalkBack);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            direction.y -= 1;  // Move down
+            translation.y -= 1;  // Move down
             setAnimationState(Player.PlayerAnimation.WalkFront);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            direction.x -= 1;  // Move left
+            translation.x -= 1;  // Move left
             setAnimationState(Player.PlayerAnimation.WalkLeft);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            direction.x += 1;  // Move right
+            translation.x += 1;  // Move right
             setAnimationState(Player.PlayerAnimation.WalkRight);
             setMoving(true);
         }
 
         // Not moving
-        if (direction.equals(Vector2.Zero)) {
+        if (translation.isZero()) {
             setMoving(false);
         }
 
@@ -124,15 +124,16 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
             }
         }
 
-        // Normalize translation vector so that the player doesn't move faster diagonally
-        direction.nor();
+        translation
+            .nor() // Normalize translation vector so that the player doesn't move faster diagonally
+            .scl(getSpeed())
+            .scl(Gdx.graphics.getDeltaTime());
 
-        // Move player based on direction and speed
-        Vector2 translation = direction.scl(getSpeed() * Gdx.graphics.getDeltaTime());
         position.add(translation);
 
         // Have the camera follow the player
         viewport.getCamera().position.set(position.x, position.y, 0);
+        viewport.getCamera().update();
     }
 
     public PlayerAnimation getAnimationState() {
@@ -145,10 +146,6 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
 
     public float getSpeed() {
         return speed;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
     }
 
     public boolean isMoving() {
@@ -164,8 +161,8 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
      */
     public Vector2i getChunk() {
         return new Vector2i(
-            MathUtils.floor(position.x / Chunk.CHUNK_SIZE),
-            MathUtils.floor(position.y / Chunk.CHUNK_SIZE)
+            MathUtils.floor(position.x / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE)),
+            MathUtils.floor(position.y / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE))
         );
     }
 

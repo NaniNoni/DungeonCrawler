@@ -104,8 +104,8 @@ public final class PerlinNoise {
          */
 
         // obtaining fractional part of the coordinates to get varied results
-        x = x - MathUtils.floorPositive(x);
-        y = y - MathUtils.floorPositive(y);
+        x = x - MathUtils.floor(x);
+        y = y - MathUtils.floor(y);
 
         // Compute fade curves for x, y
         float u = fade(x);

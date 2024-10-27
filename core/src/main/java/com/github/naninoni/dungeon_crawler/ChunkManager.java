@@ -19,8 +19,6 @@ public class ChunkManager {
     public void update() {
         Vector2i currentPlayerChunk = Player.getInstance().getChunk();
 
-        System.out.println(currentPlayerChunk);
-
         if (!currentPlayerChunk.equals(previousPlayerChunk)) {
             updateChunks();
             previousPlayerChunk = currentPlayerChunk;
@@ -28,26 +26,28 @@ public class ChunkManager {
     }
 
     public void updateChunks() {
-        /*
-          The radius of chunks to load around the player.
-          e.g. 1 means a 3x3 grid of chunks will be loaded.
-         */
-        int CHUNK_LOAD_RADIUS = 1;
+        int CHUNK_LOAD_RADIUS = 3;
+        Vector2i currentPlayerChunk = Player.getInstance().getChunk();
+        Map<Vector2i, Chunk> updatedChunks = new HashMap<>();
 
         for (int dx = -CHUNK_LOAD_RADIUS; dx <= CHUNK_LOAD_RADIUS; dx++) {
             for (int dy = -CHUNK_LOAD_RADIUS; dy <= CHUNK_LOAD_RADIUS; dy++) {
-                Vector2i chunkPos = Player.getInstance().getChunk().cpy().add(dx, dy);
+                Vector2i chunkPos = currentPlayerChunk.cpy().add(dx, dy);
 
-                // Chunk already loaded
+                // Use existing chunk if available, otherwise create a new one
                 if (chunks.containsKey(chunkPos)) {
+                    updatedChunks.put(chunkPos, chunks.get(chunkPos));
                     continue;
                 }
 
                 System.out.println("Generating chunk at " + chunkPos);
-                Chunk chunk = new Chunk(chunkPos);
-                chunks.put(chunkPos, chunk);
+                updatedChunks.put(chunkPos, new Chunk(chunkPos));
             }
         }
+
+        // Replace old chunks with updated chunk map
+        chunks.clear();
+        chunks.putAll(updatedChunks);
     }
 
     public void draw(SpriteBatch batch) {

@@ -33,10 +33,10 @@ public class Main extends ApplicationAdapter {
         chest = new Chest();
         slime = new Slime();
 
-        // Instantiate a SpriteBatch for drawing and reset the elapsed animation
-        // time to 0
+        // This sprite batch is used to draw everything.
+        // TODO: check if this is optimal
         spriteBatch = new SpriteBatch();
-        stateTime = 0f;// Register the input processor to handle scroll events
+        stateTime = 0f;
 
         // On-scroll callback
         Gdx.input.setInputProcessor(new InputAdapter() {

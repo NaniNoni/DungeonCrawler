@@ -7,9 +7,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 
 public class Chunk {
-    public final static int CHUNK_SIZE = 200;
+    public final static int CHUNK_SIZE = 32;
 
-    private final static int TILE_SIZE = 16;
+    public final static int TILE_SIZE = 16;
     private final static Texture spriteSheet = new Texture(Gdx.files.internal("sprites/tilesets/decor_16x16.png"));
     private final static TextureRegion[][] splitSheet = TextureRegion.split(spriteSheet, TILE_SIZE, TILE_SIZE);
 
@@ -22,11 +22,13 @@ public class Chunk {
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
-                // TODO: figure out why multiply by 0.1f
-                float noiseValue = PerlinNoise.perlinNoise(x * 0.1f, y * 0.1f);
+                float globalX = position.x * CHUNK_SIZE + x;
+                float globalY = position.y * CHUNK_SIZE + y;
+                // Multiply by 0.1f to get decimal places. They are used in the noise algorithm.
+                float noiseValue = PerlinNoise.perlinNoise(globalX * 0.1f, globalY * 0.1f);
 
-                int ty = MathUtils.floorPositive(noiseValue * (splitSheet[0].length - 1));
                 int tx = MathUtils.floorPositive(noiseValue * (splitSheet.length - 1));
+                int ty = MathUtils.floorPositive(noiseValue * (splitSheet[0].length - 1));
                 Vector2i textureCoordinates = new Vector2i(tx, ty);
                 textureMap[x][y] = textureCoordinates;
             }
@@ -46,9 +48,5 @@ public class Chunk {
                 );
             }
         }
-    }
-
-    public Vector2i getPosition() {
-        return position;
     }
 }
