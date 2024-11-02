@@ -16,6 +16,8 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     }
 
     private boolean isMoving = false;
+    private boolean isAttacking = false;
+    private final float attackRange = 1.0f;
 
     public void setSpeed(float speed) {
         this.speed = speed;
@@ -30,10 +32,14 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         MoveFront,
         MoveBack,
         MoveLeft,
-        MoveRight
+        MoveRight,
+        AttackFront,
+        AttackRight,
+        AttackLeft,
+        AttackBack
     }
     // TODO: change animation to UP/DOWN instead of front back
-    private float speed = 1f;
+    private float speed = 100f;
     Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
@@ -56,13 +62,14 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         TextureRegion[] walkRight = Arrays.copyOfRange(regions[4], 0, 6);
         TextureRegion[] walkFront = Arrays.copyOfRange(regions[5], 0, 6);
         TextureRegion[] attackFront = Arrays.copyOfRange(regions[8], 0, 8);
-        TextureRegion[] attackRight = Arrays.copyOfRange(regions[7], 0, 8);
+        TextureRegion[] attackRight = Arrays.copyOfRange(regions[7], 0, 7);
         TextureRegion[] attackBack = Arrays.copyOfRange(regions[6], 0, 8);
         TextureRegion[] die = Arrays.copyOfRange(regions[12], 0, 5);
         //TODO: update animation for getting damage
 
         TextureRegion[] idleLeft = flipTextureRegions(idleRight);
         TextureRegion[] walkLeft = flipTextureRegions(walkRight);
+        TextureRegion[] attackLeft = flipTextureRegions(attackRight);
 
         animations.put(SlimeAnimation.IdleFront, new Animation<>(FRAME_DURATION, idleFront));
         animations.put(SlimeAnimation.IdleBack, new Animation<>(FRAME_DURATION, idleBack));
@@ -73,6 +80,12 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         animations.put(SlimeAnimation.MoveBack, new Animation<>(FRAME_DURATION, walkBack));
         animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkLeft));
         animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
+
+        animations.put(SlimeAnimation.AttackFront, new Animation<>(FRAME_DURATION, attackFront));
+        animations.put(SlimeAnimation.AttackBack, new Animation<>(FRAME_DURATION, attackBack));
+        animations.put(SlimeAnimation.AttackLeft, new Animation<>(FRAME_DURATION, attackLeft));
+        animations.put(SlimeAnimation.AttackRight, new Animation<>(FRAME_DURATION, attackRight));
+
     }
 
     public boolean isMoving() {
@@ -144,34 +157,55 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         Vector2 translation = slimeDirection.scl(getSpeed() * Gdx.graphics.getDeltaTime());
         position.add(translation);
     }
+    private void attackPlayer() {
+        Player player = Player.getInstance();
+        player.takeDamage(10);
+
+    }
     public void move() {
         Vector2 playerPos = Player.getInstance().position;
-        // Move towards playerPos
         Vector2 direction = new Vector2(playerPos).sub(position);
         float distancetoPlayer = direction.len();
 
-        if (distancetoPlayer > 0.5f) {
+        if (distancetoPlayer > attackRange) {
+            // Move towards the player
+            isAttacking = false;
             direction.nor();
-            Vector2 translation = direction.scl(speed);
+            Vector2 translation = direction.scl(speed * Gdx.graphics.getDeltaTime());
             position.add(translation);
 
-        }
-
-        // Determining angle based on dir of player
-        float angle = direction.angleDeg();
-
-        if (angle >= 45 && angle < 135) {
-            setAnimationState(SlimeAnimation.MoveFront);
-        } else if (angle >= 135 && angle < 225) {
-            setAnimationState(SlimeAnimation.MoveLeft);
-        } else if (angle >= 225 && angle < 315) {
-            setAnimationState(SlimeAnimation.MoveBack);
+            // set animation state according to direction
+            float angle = direction.angleDeg();
+            if (angle >= 45 && angle < 135) {
+                setAnimationState(SlimeAnimation.MoveFront);
+            } else if (angle >= 135 && angle < 225) {
+                setAnimationState(SlimeAnimation.MoveLeft);
+            } else if (angle >= 225 && angle < 315) {
+                setAnimationState(SlimeAnimation.MoveBack);
+            } else {
+                setAnimationState(SlimeAnimation.MoveRight);
+            }
         } else {
-            setAnimationState(SlimeAnimation.MoveRight);
+            // Slime is close enough to attack
+            isAttacking = true;
+
+            // Set the appropriate attack animation based on direction
+            float angle = direction.angleDeg();
+            if (angle >= 45 && angle < 135) {
+                setAnimationState(SlimeAnimation.AttackFront);
+            } else if (angle >= 135 && angle < 225) {
+                setAnimationState(SlimeAnimation.AttackLeft);
+            } else if (angle >= 225 && angle < 315) {
+                setAnimationState(SlimeAnimation.AttackBack);
+            } else {
+                setAnimationState(SlimeAnimation.AttackRight);
+            }
+
+            attackPlayer();
         }
 
-        // when slime doesn't move switch to idle animation
-        if (distancetoPlayer <= 0.5f) {
+        // Set idle animation when the slime isn't moving or attacking
+        if (!isAttacking && distancetoPlayer <= attackRange) {
             switch (getAnimationState()) {
                 case MoveFront:
                     setAnimationState(SlimeAnimation.IdleBack);
