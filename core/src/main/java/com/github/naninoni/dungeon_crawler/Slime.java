@@ -34,10 +34,20 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     }
     // TODO: change animation to UP/DOWN instead of front back
     private float speed = 1f;
+    private int health;
+    private int maxHealth;
+    private int attackDamage;
+    private float attackCooldown;
+    private float attackTimer;
     Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
         super(new Vector2(50, 50), 50f, SlimeAnimation.IdleFront);
+        this.maxHealth = 50;
+        this.health = maxHealth;
+        this.attackDamage = 10;
+        this.attackCooldown = 1.5f;
+        this.attackTimer = 0f;
 
         final int TEXTURES_PER_ROW = 7;
         final int TEXTURES_PER_COLUMN = 13;
@@ -89,6 +99,14 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
 
     public void setAnimationState(Slime.SlimeAnimation animationState) {
         this.animationState = animationState;
+    }
+
+    public void takeDamage(int amount) {
+        health -= amount;
+        if (health <= 0) {
+            health = 0;
+            // Handle slime death
+        }
     }
 
     public void input() {
