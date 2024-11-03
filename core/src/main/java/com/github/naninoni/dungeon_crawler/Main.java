@@ -7,8 +7,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Box2D;
 
 /**
  * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
@@ -21,6 +25,10 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch spriteBatch;
     private float stateTime;
     private ExtendViewport viewport;
+
+    //box2d
+    private World world;
+    private Box2DDebugRenderer debugRenderer;
 
     @Override
     public void create() {
@@ -37,6 +45,10 @@ public class Main extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
 
+        Box2D.init();
+        world = new World(new Vector2(0,0), true);
+        debugRenderer = new Box2DDebugRenderer();
+        Player.getInstance().createBody(world);
         // On-scroll callback
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
@@ -61,6 +73,9 @@ public class Main extends ApplicationAdapter {
     }
 
     private void update() {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        world.step(deltaTime, 6, 2);
+        Player.getInstance().update();
         chunkManager.update();
         slime.move();
     }
@@ -85,6 +100,8 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().draw(spriteBatch, stateTime);
 
         spriteBatch.end();
+
+        debugRenderer.render(world,viewport.getCamera().combined);
     }
 
     @Override
@@ -97,5 +114,7 @@ public class Main extends ApplicationAdapter {
         Player.getInstance().dispose();
         slime.dispose();
         spriteBatch.dispose();
+        world.dispose();
+        debugRenderer.dispose();
     }
 }

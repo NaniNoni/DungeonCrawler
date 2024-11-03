@@ -8,11 +8,17 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.Arrays;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     private static Player instance;
+    private Body body;
 
     public static Player getInstance() {
         if (instance == null) {
@@ -20,6 +26,9 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         }
         return instance;
     }
+
+
+
 
     public enum PlayerAnimation {
         IdleFront,
@@ -30,15 +39,30 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         WalkFront,
         WalkBack,
         WalkLeft,
-        WalkRight
+        WalkRight,
+
+        AttackFront,
+        AttackBack,
+        AttackLeft,
+        AttackRight
+
     }
 
     private boolean isMoving = false;
     private final float speed = 400f;
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
+    private int health;
+    private int maxHealth;
+    private int attackDamage;
+
+
 
     public Player() {
         super(new Vector2(), 50f, PlayerAnimation.IdleFront);
+        this.maxHealth = 100;
+        this.health = maxHealth;
+        this.attackDamage = 25;
+
 
         final int TEXTURES_PER_ROW = 6;
         final int TEXTURES_PER_COLUMN = 10;
@@ -56,13 +80,14 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         TextureRegion[] walkRight = Arrays.copyOfRange(regions[4], 0, 6);
         TextureRegion[] walkBack = Arrays.copyOfRange(regions[5], 0, 6);
         TextureRegion[] attackFront = Arrays.copyOfRange(regions[6], 0, 4);
-        TextureRegion[] attackSide = Arrays.copyOfRange(regions[7], 0, 4);
+        TextureRegion[] attackRight = Arrays.copyOfRange(regions[7], 0, 4);
         TextureRegion[] attackBack = Arrays.copyOfRange(regions[8], 0, 4);
         TextureRegion[] die = Arrays.copyOfRange(regions[9], 0, 3);
 
         // Flipped animations
         TextureRegion[] idleLeft = flipTextureRegions(idleRight);
         TextureRegion[] walkLeft = flipTextureRegions(walkRight);
+        TextureRegion[] attackLeft = flipTextureRegions(attackRight);
 
         animations.put(PlayerAnimation.IdleFront, new Animation<>(FRAME_DURATION, idleFront));
         animations.put(PlayerAnimation.IdleBack, new Animation<>(FRAME_DURATION, idleBack));
@@ -73,63 +98,101 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         animations.put(PlayerAnimation.WalkBack, new Animation<>(FRAME_DURATION, walkBack));
         animations.put(PlayerAnimation.WalkLeft, new Animation<>(FRAME_DURATION, walkLeft));
         animations.put(PlayerAnimation.WalkRight, new Animation<>(FRAME_DURATION, walkRight));
+
+        animations.put(PlayerAnimation.AttackFront, new Animation<>(FRAME_DURATION, attackFront));
+        animations.put(PlayerAnimation.AttackBack, new Animation<>(FRAME_DURATION, attackBack));
+        animations.put(PlayerAnimation.AttackLeft, new Animation<>(FRAME_DURATION, attackLeft));
+        animations.put(PlayerAnimation.AttackRight, new Animation<>(FRAME_DURATION, attackRight));
+    }
+
+    void createBody(World world) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position.x, position.y);
+
+        body = world.createBody(bodyDef);
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(0.25f);
+        //TODO: adjust radius later
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 1f;
+
+        body.createFixture(fixtureDef);
+        shape.dispose();
+    }
+
+    public void update() {
+        position.set(body.getPosition());
     }
 
     public void input(Viewport viewport) {
-        Vector2 translation = new Vector2();
+        Vector2 velocity = new Vector2();
 
         // Check for WASD key presses and update direction accordingly
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            translation.y += 1;  // Move up
-            setAnimationState(Player.PlayerAnimation.WalkBack);
+            velocity.y += 1;  // Move up
+            setAnimationState(PlayerAnimation.WalkBack);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            translation.y -= 1;  // Move down
-            setAnimationState(Player.PlayerAnimation.WalkFront);
+            velocity.y -= 1;  // Move down
+            setAnimationState(PlayerAnimation.WalkFront);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            translation.x -= 1;  // Move left
-            setAnimationState(Player.PlayerAnimation.WalkLeft);
+            velocity.x -= 1;  // Move left
+            setAnimationState(PlayerAnimation.WalkLeft);
             setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            translation.x += 1;  // Move right
-            setAnimationState(Player.PlayerAnimation.WalkRight);
+            velocity.x += 1;  // Move right
+            setAnimationState(PlayerAnimation.WalkRight);
             setMoving(true);
         }
 
         // Not moving
-        if (translation.isZero()) {
+        if (velocity.isZero()) {
             setMoving(false);
-        }
-
-        // If the player isn't moving, switch to the idle animation for the last direction
-        if (!isMoving()) {
+            // If the player isn't moving, switch to the idle animation for the last direction
             switch (getAnimationState()) {
                 case WalkBack:
-                    setAnimationState(Player.PlayerAnimation.IdleBack);
+                    setAnimationState(PlayerAnimation.IdleBack);
                     break;
                 case WalkFront:
-                    setAnimationState(Player.PlayerAnimation.IdleFront);
+                    setAnimationState(PlayerAnimation.IdleFront);
                     break;
                 case WalkLeft:
-                    setAnimationState(Player.PlayerAnimation.IdleLeft);
+                    setAnimationState(PlayerAnimation.IdleLeft);
                     break;
                 case WalkRight:
-                    setAnimationState(Player.PlayerAnimation.IdleRight);
+                    setAnimationState(PlayerAnimation.IdleRight);
                     break;
             }
+        } else {
+            // Normalize and scale the velocity to maintain consistent speed
+            velocity.nor().scl(getSpeed());
         }
 
+        /**
+        sleeping:  in box2d, bodies can enter a 'sleeping' state when they come to rest, and they need a significant force to 'wake' them up.
+         */
+        body.setLinearVelocity(velocity);
+        body.setAwake(true); // Wake up the body
+
+
+        // Set the body's linear velocity
+        body.setLinearVelocity(velocity);
+/*
         translation
             .nor() // Normalize translation vector so that the player doesn't move faster diagonally
             .scl(getSpeed())
             .scl(Gdx.graphics.getDeltaTime());
 
         position.add(translation);
-
+*/
         // Have the camera follow the player
         viewport.getCamera().position.set(position.x, position.y, 0);
         viewport.getCamera().update();
@@ -169,3 +232,4 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         spriteSheet.dispose();
     }
 }
+
