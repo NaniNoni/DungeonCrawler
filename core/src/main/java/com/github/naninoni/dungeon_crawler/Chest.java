@@ -3,10 +3,7 @@ package com.github.naninoni.dungeon_crawler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.particles.influencers.RegionInfluencer;
-import com.badlogic.gdx.math.Vector2;
 
 public class Chest extends AnimatedGameObject<Chest.ChestAnimation> {
     public enum ChestAnimation {
@@ -18,7 +15,7 @@ public class Chest extends AnimatedGameObject<Chest.ChestAnimation> {
     private final Animation<TextureRegion> openAnimation;
 
     public Chest() {
-        super(new Vector2(), 50f, ChestAnimation.Open);
+        super(ChestAnimation.Open);
 
         final float FRAME_DURATION = 0.1f;
         final int TEXTURE_COUNT = 4;
