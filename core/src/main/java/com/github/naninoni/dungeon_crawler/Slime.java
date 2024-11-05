@@ -17,8 +17,6 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         return speed;
     }
 
-    private boolean isMoving = false;
-
     public void setSpeed(float speed) {
         this.speed = speed;
     }
@@ -35,7 +33,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         MoveRight
     }
     // TODO: change animation to UP/DOWN instead of front back
-    private float speed = 1f;
+    private float speed = 50f;
     Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
@@ -76,7 +74,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkLeft));
         animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
 
-        createBody(Main.getWorld(), new Vector2());
+        createBody(Main.getWorld(), new Vector2(0,0));
     }
 
     void createBody(World world, Vector2 position) {
@@ -99,14 +97,6 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         shape.dispose();
     }
 
-    public boolean isMoving() {
-        return isMoving;
-    }
-
-    public void setMoving(boolean moving) {
-        isMoving = moving;
-    }
-
     public SlimeAnimation getAnimationState() {
         return animationState;
     }
@@ -115,23 +105,16 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         this.animationState = animationState;
     }
 
-    public void input() {
-    }
-
-    public void move() {
+    public void update() {
         Vector2 playerPos = Player.getInstance().physicsBody.getPosition();
-        // Move towards playerPos
-        Vector2 direction = new Vector2(playerPos).sub(physicsBody.getPosition());
+        Vector2 direction = playerPos.cpy().sub(physicsBody.getPosition());
         float distanceToPlayer = direction.len();
 
-        if (distanceToPlayer > 0.5f) {
-            direction.nor();
-            Vector2 translation = direction.scl(speed);
-            // TODO: use box2D physics instead
-//            physicsBody.getPosition().add(translation);
+        if (!direction.isZero()) {
+            Vector2 velocity = direction.cpy().nor().scl(getSpeed());
 
-            System.out.println(translation);
-            physicsBody.setLinearVelocity(translation);
+            System.out.println(velocity);
+            physicsBody.setLinearVelocity(velocity);
         }
 
         // Determining angle based on dir of player
@@ -148,7 +131,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         }
 
         // when slime doesn't move switch to idle animation
-        if (distanceToPlayer <= 0.5f) {
+        if (direction.isZero()) {
             switch (getAnimationState()) {
                 case MoveFront:
                     setAnimationState(SlimeAnimation.IdleBack);

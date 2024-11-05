@@ -79,12 +79,11 @@ public class Main extends ApplicationAdapter {
         world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
         Player.getInstance().update();
         chunkManager.update();
-        slime.move();
+        slime.update();
     }
 
     private void input() {
         Player.getInstance().input(viewport);
-        slime.input();
     }
 
     private void draw() {

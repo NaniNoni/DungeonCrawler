@@ -99,7 +99,7 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         animations.put(PlayerAnimation.AttackLeft, new Animation<>(FRAME_DURATION, attackLeft));
         animations.put(PlayerAnimation.AttackRight, new Animation<>(FRAME_DURATION, attackRight));
 
-        createBody(Main.getWorld(), new Vector2());
+        createBody(Main.getWorld(), new Vector2(100, 100));
     }
 
     private void createBody(World world, Vector2 position) {
@@ -132,27 +132,22 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             velocity.y += 1;  // Move up
             setAnimationState(PlayerAnimation.WalkBack);
-            setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             velocity.y -= 1;  // Move down
             setAnimationState(PlayerAnimation.WalkFront);
-            setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             velocity.x -= 1;  // Move left
             setAnimationState(PlayerAnimation.WalkLeft);
-            setMoving(true);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             velocity.x += 1;  // Move right
             setAnimationState(PlayerAnimation.WalkRight);
-            setMoving(true);
         }
 
         // Not moving
         if (velocity.isZero()) {
-            setMoving(false);
             // If the player isn't moving, switch to the idle animation for the last direction
             switch (getAnimationState()) {
                 case WalkBack:
@@ -168,18 +163,16 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
                     setAnimationState(PlayerAnimation.IdleRight);
                     break;
             }
+
+            physicsBody.setAwake(false);
         } else {
             // Normalize and scale the velocity to maintain consistent speed
             velocity.nor().scl(getSpeed());
         }
 
-        /**
-        sleeping:  in box2d, bodies can enter a 'sleeping' state when they come to rest, and they need a significant force to 'wake' them up.
-         */
-        physicsBody.setLinearVelocity(velocity);
-        physicsBody.setAwake(true); // Wake up the body
-
-        // Set the body's linear velocity
+        // sleeping:  in Box2D, bodies can enter a 'sleeping' state when they come to rest,
+        // and they need a significant force to 'wake' them up.
+        physicsBody.setAwake(true);
         physicsBody.setLinearVelocity(velocity);
 
         // Have the camera follow the player
@@ -197,14 +190,6 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
 
     public float getSpeed() {
         return speed;
-    }
-
-    public boolean isMoving() {
-        return isMoving;
-    }
-
-    public void setMoving(boolean moving) {
-        isMoving = moving;
     }
 
     /**
