@@ -3,9 +3,7 @@ package com.github.naninoni.dungeon_crawler;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.EnumMap;
 
@@ -15,7 +13,6 @@ public abstract class AnimatedGameObject<E extends Enum<E>> {
     protected Body physicsBody;
 
     public AnimatedGameObject(E initialAnimationState) {
-
         this.animationState = initialAnimationState;
         this.animations = new EnumMap<>(initialAnimationState.getDeclaringClass());
     }
@@ -31,6 +28,14 @@ public abstract class AnimatedGameObject<E extends Enum<E>> {
             currentFrame,
             physicsBody.getPosition().x, physicsBody.getPosition().y
         );
+    }
+
+    public E getAnimationState() {
+        return animationState;
+    }
+
+    public void setAnimationState(E animationState) {
+        this.animationState = animationState;
     }
 
     protected static TextureRegion[] flipTextureRegions(final TextureRegion[] regions) {
