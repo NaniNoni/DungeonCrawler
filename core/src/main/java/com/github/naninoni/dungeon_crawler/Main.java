@@ -19,6 +19,7 @@ import com.badlogic.gdx.physics.box2d.Box2D;
  */
 public class Main extends ApplicationAdapter {
     private Slime slime;
+    // TODO: use the chest
     private Chest chest;
     private ChunkManager chunkManager;
 
@@ -26,14 +27,27 @@ public class Main extends ApplicationAdapter {
     private float stateTime;
     private ExtendViewport viewport;
 
-    //box2d
-    private World world;
+    // Box 2D objects
+    private static World world;
     private Box2DDebugRenderer debugRenderer;
+
+    /**
+     * Used to access the global Box2D World.
+     * @return the global static instance of a Box2D World.
+     */
+    public static World getWorld() {
+        return world;
+    }
 
     @Override
     public void create() {
         final float WORLD_WIDTH = 800;
         final float WORLD_HEIGHT = 800;
+
+        Box2D.init();
+        world = new World(new Vector2(), true);
+        debugRenderer = new Box2DDebugRenderer();
+
         viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         chunkManager = new ChunkManager();
 
@@ -45,22 +59,7 @@ public class Main extends ApplicationAdapter {
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
 
-        Box2D.init();
-        world = new World(new Vector2(0,0), true);
-        debugRenderer = new Box2DDebugRenderer();
-        Player.getInstance().createBody(world);
-        // On-scroll callback
-        Gdx.input.setInputProcessor(new InputAdapter() {
-            @Override
-            public boolean scrolled(float amountX, float amountY) {
-                OrthographicCamera camera = (OrthographicCamera) viewport.getCamera();
-
-                // Zoom in when scrolling down (amountY is negative), zoom out when scrolling up
-                camera.zoom = MathUtils.clamp(camera.zoom + amountY * 0.1f, 0.1f, 2.0f);
-                camera.update();
-                return true;
-            }
-        });
+        slime.createBody(world, new Vector2());
     }
 
     @Override
@@ -73,8 +72,11 @@ public class Main extends ApplicationAdapter {
     }
 
     private void update() {
+        final int VELOCITY_ITERATIONS = 6;
+        final int POSITION_ITERATIONS = 2;
+
         float deltaTime = Gdx.graphics.getDeltaTime();
-        world.step(deltaTime, 6, 2);
+        world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
         Player.getInstance().update();
         chunkManager.update();
         slime.move();
@@ -95,7 +97,6 @@ public class Main extends ApplicationAdapter {
         spriteBatch.begin();
 
         chunkManager.draw(spriteBatch);
-        chest.draw(spriteBatch, stateTime);
         slime.draw(spriteBatch, stateTime);
         Player.getInstance().draw(spriteBatch, stateTime);
 

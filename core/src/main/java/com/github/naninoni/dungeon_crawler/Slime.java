@@ -1,14 +1,16 @@
 package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 
 public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     public float getSpeed() {
@@ -37,7 +39,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/slime.png"));
 
     public Slime() {
-        super(new Vector2(50, 50), 50f, SlimeAnimation.IdleFront);
+        super(SlimeAnimation.IdleFront);
 
         final int TEXTURES_PER_ROW = 7;
         final int TEXTURES_PER_COLUMN = 13;
@@ -73,6 +75,28 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         animations.put(SlimeAnimation.MoveBack, new Animation<>(FRAME_DURATION, walkBack));
         animations.put(SlimeAnimation.MoveLeft, new Animation<>(FRAME_DURATION, walkLeft));
         animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
+
+        createBody(Main.getWorld(), new Vector2());
+    }
+
+    void createBody(World world, Vector2 position) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position);
+
+        physicsBody = world.createBody(bodyDef);
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(0.25f);
+        // TODO: adjust radius later
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 1f;
+
+        physicsBody.createFixture(fixtureDef);
+        // Dispose of shape to not display it
+        shape.dispose();
     }
 
     public boolean isMoving() {
@@ -92,69 +116,22 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
     }
 
     public void input() {
-        Vector2 slimeDirection = new Vector2();
-
-        if (Gdx.input.isKeyPressed(Input.Keys.K)) {
-            slimeDirection.y += 1;  // Move up
-            setAnimationState(SlimeAnimation.MoveFront);
-            setMoving(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.J)) {
-            slimeDirection.y -= 1;  // Move down
-            setAnimationState(SlimeAnimation.MoveBack);
-            setMoving(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.H)) {
-            slimeDirection.x -= 1;  // Move left
-            setAnimationState(SlimeAnimation.MoveLeft);
-            setMoving(true);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.L)) {
-            slimeDirection.x += 1;  // Move right
-            setAnimationState(SlimeAnimation.MoveRight);
-            setMoving(true);
-        }
-        // when Not moving
-        if (slimeDirection.equals(Vector2.Zero)) {
-            setMoving(false);
-        }
-
-        // If the slime isn't moving, switch to the idle animation for the last direction
-        if (!isMoving()) {
-            switch (getAnimationState()) {
-                case MoveBack:
-                    setAnimationState(SlimeAnimation.IdleBack);
-                    break;
-                case MoveFront:
-                    setAnimationState(SlimeAnimation.IdleFront);
-                    break;
-                case MoveLeft:
-                    setAnimationState(SlimeAnimation.IdleLeft);
-                    break;
-                case MoveRight:
-                    setAnimationState(SlimeAnimation.IdleRight);
-                    break;
-            }
-        }
-
-        // Normalize translation vector so that the player doesn't move faster diagonally
-        slimeDirection.nor();
-
-        // Move player based on direction and speed
-        Vector2 translation = slimeDirection.scl(getSpeed() * Gdx.graphics.getDeltaTime());
-        position.add(translation);
     }
-    public void move() {
-        Vector2 playerPos = Player.getInstance().position;
-        // Move towards playerPos
-        Vector2 direction = new Vector2(playerPos).sub(position);
-        float distancetoPlayer = direction.len();
 
-        if (distancetoPlayer > 0.5f) {
+    public void move() {
+        Vector2 playerPos = Player.getInstance().physicsBody.getPosition();
+        // Move towards playerPos
+        Vector2 direction = new Vector2(playerPos).sub(physicsBody.getPosition());
+        float distanceToPlayer = direction.len();
+
+        if (distanceToPlayer > 0.5f) {
             direction.nor();
             Vector2 translation = direction.scl(speed);
-            position.add(translation);
+            // TODO: use box2D physics instead
+//            physicsBody.getPosition().add(translation);
 
+            System.out.println(translation);
+            physicsBody.setLinearVelocity(translation);
         }
 
         // Determining angle based on dir of player
@@ -171,7 +148,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         }
 
         // when slime doesn't move switch to idle animation
-        if (distancetoPlayer <= 0.5f) {
+        if (distanceToPlayer <= 0.5f) {
             switch (getAnimationState()) {
                 case MoveFront:
                     setAnimationState(SlimeAnimation.IdleBack);

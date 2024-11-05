@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -18,17 +17,15 @@ import java.util.Arrays;
 
 public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     private static Player instance;
-    private Body body;
 
+    // NOTE: This is not thread safe.
+    // Since the web build is inherently single-threaded, it doesn't matter.
     public static Player getInstance() {
         if (instance == null) {
             instance = new Player();
         }
         return instance;
     }
-
-
-
 
     public enum PlayerAnimation {
         IdleFront,
@@ -51,18 +48,16 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     private boolean isMoving = false;
     private final float speed = 400f;
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
-    private int health;
-    private int maxHealth;
-    private int attackDamage;
+    private int maxHealth = 100;
+    private int health = maxHealth;
+    private int attackDamage = 25;
 
-
-
-    public Player() {
-        super(new Vector2(), 50f, PlayerAnimation.IdleFront);
-        this.maxHealth = 100;
-        this.health = maxHealth;
-        this.attackDamage = 25;
-
+    /**
+     * The default constructor is default to class instantiation.
+     * The only way to access the player should be with the {@link #getInstance()} method.
+     */
+    private Player() {
+        super(PlayerAnimation.IdleFront);
 
         final int TEXTURES_PER_ROW = 6;
         final int TEXTURES_PER_COLUMN = 10;
@@ -103,29 +98,31 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         animations.put(PlayerAnimation.AttackBack, new Animation<>(FRAME_DURATION, attackBack));
         animations.put(PlayerAnimation.AttackLeft, new Animation<>(FRAME_DURATION, attackLeft));
         animations.put(PlayerAnimation.AttackRight, new Animation<>(FRAME_DURATION, attackRight));
+
+        createBody(Main.getWorld(), new Vector2());
     }
 
-    void createBody(World world) {
+    private void createBody(World world, Vector2 position) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position.x, position.y);
+        bodyDef.position.set(position);
 
-        body = world.createBody(bodyDef);
+        physicsBody = world.createBody(bodyDef);
 
         CircleShape shape = new CircleShape();
         shape.setRadius(0.25f);
-        //TODO: adjust radius later
+        // TODO: adjust radius later
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
 
-        body.createFixture(fixtureDef);
+        physicsBody.createFixture(fixtureDef);
+        // Dispose of shape to not display it
         shape.dispose();
     }
 
     public void update() {
-        position.set(body.getPosition());
     }
 
     public void input(Viewport viewport) {
@@ -179,22 +176,14 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         /**
         sleeping:  in box2d, bodies can enter a 'sleeping' state when they come to rest, and they need a significant force to 'wake' them up.
          */
-        body.setLinearVelocity(velocity);
-        body.setAwake(true); // Wake up the body
-
+        physicsBody.setLinearVelocity(velocity);
+        physicsBody.setAwake(true); // Wake up the body
 
         // Set the body's linear velocity
-        body.setLinearVelocity(velocity);
-/*
-        translation
-            .nor() // Normalize translation vector so that the player doesn't move faster diagonally
-            .scl(getSpeed())
-            .scl(Gdx.graphics.getDeltaTime());
+        physicsBody.setLinearVelocity(velocity);
 
-        position.add(translation);
-*/
         // Have the camera follow the player
-        viewport.getCamera().position.set(position.x, position.y, 0);
+        viewport.getCamera().position.set(physicsBody.getPosition(), 0);
         viewport.getCamera().update();
     }
 
@@ -223,8 +212,8 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
      */
     public Vector2i getChunk() {
         return new Vector2i(
-            MathUtils.floor(position.x / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE)),
-            MathUtils.floor(position.y / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE))
+            MathUtils.floor(physicsBody.getPosition().x / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE)),
+            MathUtils.floor(physicsBody.getPosition().y / (Chunk.CHUNK_SIZE * Chunk.TILE_SIZE))
         );
     }
 
