@@ -42,10 +42,8 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         AttackBack,
         AttackLeft,
         AttackRight
-
     }
 
-    private boolean isMoving = false;
     private final float speed = 400f;
     private final Texture spriteSheet = new Texture(Gdx.files.internal("sprites/characters/player.png"));
     private int maxHealth = 100;
@@ -181,14 +179,6 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         // Have the camera follow the player
         viewport.getCamera().position.set(physicsBody.getPosition(), 0);
         viewport.getCamera().update();
-    }
-
-    public PlayerAnimation getAnimationState() {
-        return animationState;
-    }
-
-    public void setAnimationState(PlayerAnimation animationState) {
-        this.animationState = animationState;
     }
 
     public float getSpeed() {

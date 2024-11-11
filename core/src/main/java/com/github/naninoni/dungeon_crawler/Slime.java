@@ -102,18 +102,9 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         shape.dispose();
     }
 
-    public SlimeAnimation getAnimationState() {
-        return animationState;
-    }
-
-    public void setAnimationState(Slime.SlimeAnimation animationState) {
-        this.animationState = animationState;
-    }
-
     public void update() {
         Vector2 playerPos = Player.getInstance().physicsBody.getPosition();
         Vector2 direction = playerPos.cpy().sub(physicsBody.getPosition());
-        float distanceToPlayer = direction.len();
 
         if (!direction.isZero()) {
             Vector2 velocity = direction.cpy().nor().scl(getSpeed());
