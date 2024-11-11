@@ -31,11 +31,9 @@ public class GameContactListener implements ContactListener {
     }
 
     private void applyKnockback(Player player, Slime slime) {
-        // Calculate knockback direction from slime to player
         Vector2 knockbackDirection = player.physicsBody.getPosition().cpy()
             .sub(slime.physicsBody.getPosition()).nor();
 
-        // Apply knockback
         player.physicsBody.applyLinearImpulse(knockbackDirection.scl(KNOCKBACK_FORCE),
             player.physicsBody.getWorldCenter(), true);
     }
