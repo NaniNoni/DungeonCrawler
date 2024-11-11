@@ -75,6 +75,7 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
 
         createBody(Main.getWorld(), new Vector2(0,0));
+        physicsBody.setLinearDamping(30f);
     }
 
     void createBody(World world, Vector2 position) {
@@ -93,6 +94,10 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         fixtureDef.density = 1f;
 
         physicsBody.createFixture(fixtureDef);
+
+        physicsBody.setUserData(this);
+
+
         // Dispose of shape to not display it
         shape.dispose();
     }
@@ -112,8 +117,6 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
 
         if (!direction.isZero()) {
             Vector2 velocity = direction.cpy().nor().scl(getSpeed());
-
-            System.out.println(velocity);
             physicsBody.setLinearVelocity(velocity);
         }
 

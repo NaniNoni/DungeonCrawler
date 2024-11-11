@@ -47,6 +47,7 @@ public class Main extends ApplicationAdapter {
         Box2D.init();
         world = new World(new Vector2(), true);
         debugRenderer = new Box2DDebugRenderer();
+        world.setContactListener(new GameContactListener());
 
         viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
         chunkManager = new ChunkManager();

@@ -118,6 +118,9 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         fixtureDef.density = 1f;
 
         physicsBody.createFixture(fixtureDef);
+
+        physicsBody.setUserData(this);
+
         // Dispose of shape to not display it
         shape.dispose();
     }
