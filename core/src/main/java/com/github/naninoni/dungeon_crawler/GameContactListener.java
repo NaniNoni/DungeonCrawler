@@ -1,41 +1,55 @@
 package com.github.naninoni.dungeon_crawler;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 
 public class GameContactListener implements ContactListener {
-    private static final float KNOCKBACK_FORCE = 20f;
+    private static final float KNOCKBACK_FORCE = 500f;
 
     @Override
     public void beginContact(Contact contact) {
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
-        if (fixtureA == null || fixtureB == null) return;
-        if (fixtureA.getUserData() == null || fixtureB.getUserData() == null) return;
+        // FIXME: figure out why this happens
+        if (fixtureA.getBody().getUserData() == fixtureB.getBody().getUserData()) {
+            return;
+        }
 
         Object userDataA = fixtureA.getBody().getUserData();
         Object userDataB = fixtureB.getBody().getUserData();
 
-        // Check if the collision is between a Player and a Slime
-        if ((userDataA instanceof Player && userDataB instanceof Slime) ||
-            (userDataA instanceof Slime && userDataB instanceof Player)) {
-
-            // Determine which is the player and which is the slime
-            Player player = userDataA instanceof Player ? (Player) userDataA : (Player) userDataB;
-            Slime slime = userDataA instanceof Slime ? (Slime) userDataA : (Slime) userDataB;
-
-            applyKnockback(player, slime);
+        if (userDataA == null || userDataB == null) {
+            Gdx.app.error(getClass().getName(), "Fixture body user data is null");
+            Gdx.app.error(getClass().getName(), "A: " + fixtureA.getUserData());
+            Gdx.app.error(getClass().getName(), "B: " + fixtureB.getUserData());
+            return;
         }
+
+        Gdx.app.log(userDataA.getClass().getName(), "A");
+        Gdx.app.log(userDataB.getClass().getName(), "B");
+
+        // NOTE: it seems that the player is always fixture A and the slime is B.
+        // I don't know if this is universal, but whatever.
+
+        assert(userDataA instanceof Player);
+        assert(userDataB instanceof Slime);
+
+        Player player = (Player) userDataA;
+        Slime slime = (Slime) userDataB;
+
+        applyKnockback(player, slime);
     }
 
     private void applyKnockback(Player player, Slime slime) {
         Vector2 knockbackDirection = player.physicsBody.getPosition().cpy()
             .sub(slime.physicsBody.getPosition()).nor();
 
-        player.physicsBody.applyLinearImpulse(knockbackDirection.scl(KNOCKBACK_FORCE),
-            player.physicsBody.getWorldCenter(), true);
+        Gdx.app.log(getClass().getName(), "knockbackDirection: " + knockbackDirection);
+
+        player.physicsBody.applyLinearImpulse(new Vector2(5000, 0), player.physicsBody.getWorldCenter(), true);
     }
 
     @Override

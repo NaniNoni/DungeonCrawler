@@ -40,7 +40,6 @@ public class ChunkManager {
                     continue;
                 }
 
-                System.out.println("Generating chunk at " + chunkPos);
                 updatedChunks.put(chunkPos, new Chunk(chunkPos));
             }
         }
