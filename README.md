@@ -1,5 +1,7 @@
 # DungeonCrawler
 
+![problem.gif](problem.gif)
+
 This is an IB Computer Science project by Michal Waligora and Liam Cho.
 The game is made in Java using LibGDX. It currently only supports the desktop platform.
 Below is the default README for a LibGDX project. It includes build instructions and all the technical info you need to know.
