@@ -59,8 +59,6 @@ public class Main extends ApplicationAdapter {
         // TODO: check if this is optimal
         spriteBatch = new SpriteBatch();
         stateTime = 0f;
-
-        slime.createBody(world, new Vector2());
     }
 
     @Override
@@ -78,13 +76,13 @@ public class Main extends ApplicationAdapter {
 
         float deltaTime = Gdx.graphics.getDeltaTime();
         world.step(deltaTime, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-        Player.getInstance().update();
+        Player.getInstance().update(viewport);
         chunkManager.update();
         slime.update();
     }
 
     private void input() {
-        Player.getInstance().input(viewport);
+        Player.getInstance().input();
     }
 
     private void draw() {

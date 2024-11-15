@@ -2,43 +2,42 @@ package com.github.naninoni.dungeon_crawler;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
-
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
 
 public class GameContactListener implements ContactListener {
-    private static final float KNOCKBACK_FORCE = 500f;
+    // TODO: figure out why this has to be so big
+    private static final float KNOCKBACK_FORCE = 1000000;
 
     @Override
     public void beginContact(Contact contact) {
-        Fixture fixtureA = contact.getFixtureA();
-        Fixture fixtureB = contact.getFixtureB();
+        Object userDataA = contact.getFixtureA().getBody().getUserData();
+        Object userDataB = contact.getFixtureB().getBody().getUserData();
 
-        // FIXME: figure out why this happens
-        if (fixtureA.getBody().getUserData() == fixtureB.getBody().getUserData()) {
-            return;
+//        if (userDataA == null || userDataB == null) {
+//            Gdx.app.error(getClass().getName(), "Fixture body user data is null");
+//            Gdx.app.error(getClass().getName(), "A: " + fixtureA.getUserData());
+//            Gdx.app.error(getClass().getName(), "B: " + fixtureB.getUserData());
+//            return;
+//        }
+//
+//        Gdx.app.log(userDataA.getClass().getName(), "A");
+//        Gdx.app.log(userDataB.getClass().getName(), "B");
+
+        // FIXME: this is gross
+        Player player;
+        Slime slime;
+        if (userDataA instanceof Player && userDataB instanceof Slime) {
+            player = (Player) userDataA;
+            slime = (Slime) userDataB;
+        } else if (userDataA instanceof Slime && userDataB instanceof Player) {
+            player = (Player) userDataB;
+            slime = (Slime) userDataA;
+        } else {
+            return; // Not a player-slime collision
         }
-
-        Object userDataA = fixtureA.getBody().getUserData();
-        Object userDataB = fixtureB.getBody().getUserData();
-
-        if (userDataA == null || userDataB == null) {
-            Gdx.app.error(getClass().getName(), "Fixture body user data is null");
-            Gdx.app.error(getClass().getName(), "A: " + fixtureA.getUserData());
-            Gdx.app.error(getClass().getName(), "B: " + fixtureB.getUserData());
-            return;
-        }
-
-        Gdx.app.log(userDataA.getClass().getName(), "A");
-        Gdx.app.log(userDataB.getClass().getName(), "B");
-
-        // NOTE: it seems that the player is always fixture A and the slime is B.
-        // I don't know if this is universal, but whatever.
-
-        assert(userDataA instanceof Player);
-        assert(userDataB instanceof Slime);
-
-        Player player = (Player) userDataA;
-        Slime slime = (Slime) userDataB;
 
         applyKnockback(player, slime);
     }
@@ -49,7 +48,8 @@ public class GameContactListener implements ContactListener {
 
         Gdx.app.log(getClass().getName(), "knockbackDirection: " + knockbackDirection);
 
-        player.physicsBody.applyLinearImpulse(new Vector2(5000, 0), player.physicsBody.getWorldCenter(), true);
+        player.physicsBody.applyLinearImpulse(knockbackDirection.scl(KNOCKBACK_FORCE), player.physicsBody.getWorldCenter(), true);
+        player.setKnockbackTimer(Player.KNOCKBACK_DURATION);
     }
 
     @Override

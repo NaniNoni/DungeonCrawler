@@ -46,6 +46,14 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
     private int maxHealth = 100;
     private int health = maxHealth;
     private int attackDamage = 25;
+    /**
+     * Used to track the amount of time the player is "incapacitated" and unable to move
+     */
+    private float knockbackTimer = 0;
+    /**
+     * The amount of time for which the player isn't able to move after hit by slime.
+     */
+    public static final float KNOCKBACK_DURATION = 0.5f;
 
     /**
      * The default constructor is default to class instantiation.
@@ -101,29 +109,42 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position);
+        bodyDef.fixedRotation = true;
+        bodyDef.linearDamping = 5;
 
         physicsBody = world.createBody(bodyDef);
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.25f);
-        // TODO: adjust radius later
+        shape.setRadius(16f);
+        shape.setPosition(new Vector2(24, 16));
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
 
         physicsBody.createFixture(fixtureDef);
-
         physicsBody.setUserData(this);
 
         // Dispose of shape to not display it
         shape.dispose();
     }
 
-    public void update() {
+    public void update(Viewport viewport) {
+        if (knockbackTimer > 0) {
+            knockbackTimer -= Gdx.graphics.getDeltaTime();
+        }
+
+        // Have the camera follow the player
+        viewport.getCamera().position.set(physicsBody.getPosition(), 0);
+        viewport.getCamera().update();
     }
 
-    public void input(Viewport viewport) {
+    public void input() {
+        // The player is incapacitated
+        if (isKnockbackActive()) {
+            return;
+        }
+
         Vector2 velocity = new Vector2();
 
         // Check for WASD key presses and update direction accordingly
@@ -162,20 +183,25 @@ public class Player extends AnimatedGameObject<Player.PlayerAnimation> {
                     break;
             }
 
-            physicsBody.setAwake(false);
+//            physicsBody.setAwake(false);
         } else {
             // Normalize and scale the velocity to maintain consistent speed
-            velocity.nor().scl(getSpeed());
+
+            // sleeping:  in Box2D, bodies can enter a 'sleeping' state when they come to rest,
+            // and they need a significant force to 'wake' them up.
+//            physicsBody.setAwake(true);
         }
 
-        // sleeping:  in Box2D, bodies can enter a 'sleeping' state when they come to rest,
-        // and they need a significant force to 'wake' them up.
-        physicsBody.setAwake(true);
+        velocity.nor().scl(getSpeed());
         physicsBody.setLinearVelocity(velocity);
+    }
 
-        // Have the camera follow the player
-        viewport.getCamera().position.set(physicsBody.getPosition(), 0);
-        viewport.getCamera().update();
+    public void setKnockbackTimer(float duration) {
+        this.knockbackTimer = duration;
+    }
+
+    public boolean isKnockbackActive() {
+        return knockbackTimer > 0;
     }
 
     public float getSpeed() {

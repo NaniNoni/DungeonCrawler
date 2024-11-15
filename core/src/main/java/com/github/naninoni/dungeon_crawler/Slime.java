@@ -75,28 +75,26 @@ public class Slime extends AnimatedGameObject<Slime.SlimeAnimation> {
         animations.put(SlimeAnimation.MoveRight, new Animation<>(FRAME_DURATION, walkRight));
 
         createBody(Main.getWorld(), new Vector2(0,0));
-        physicsBody.setLinearDamping(30f);
     }
 
     void createBody(World world, Vector2 position) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position);
+        bodyDef.fixedRotation = true;
 
         physicsBody = world.createBody(bodyDef);
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(0.25f);
-        // TODO: adjust radius later
+        shape.setRadius(16f);
+        shape.setPosition(new Vector2(16, 16));
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
 
         physicsBody.createFixture(fixtureDef);
-
         physicsBody.setUserData(this);
-
 
         // Dispose of shape to not display it
         shape.dispose();
